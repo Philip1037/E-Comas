@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-import { setAdminAuthenticated, getStoredSettings, saveStoredSettings } from '@/lib/storage';
+import { setAdminAuthenticated, getStoredSettings, saveStoredSettings, initializeDatabaseSync } from '@/lib/storage';
 import { sendAdminPasswordResetEmail } from '@/lib/email';
 import { ShieldCheck, Lock, Mail, ArrowRight, Sparkles, Store, KeyRound, CheckCircle2, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
@@ -26,9 +26,13 @@ export default function AdminLoginPage() {
   useEffect(() => {
     setEmail('');
     setPassword('');
-    const settings = getStoredSettings();
-    setRecoveryEmail(settings.admin_recovery_email || 'philipbangura1037@gmail.com');
+    initializeDatabaseSync().then(() => {
+      const settings = getStoredSettings();
+      setRecoveryEmail(settings.admin_recovery_email || 'philipbangura1037@gmail.com');
+    });
   }, []);
+
+
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
