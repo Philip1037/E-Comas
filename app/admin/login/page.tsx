@@ -169,6 +169,10 @@ export default function AdminLoginPage() {
           {/* Mode 1: Standard Login */}
           {mode === 'login' && (
             <form onSubmit={handleLogin} autoComplete="off" className="space-y-4">
+              {/* Dummy inputs to trap aggressive browser password managers (Chrome/Edge/Safari) */}
+              <input type="text" name="fake_username_remember" style={{ display: 'none' }} tabIndex={-1} aria-hidden="true" readOnly />
+              <input type="password" name="fake_password_remember" style={{ display: 'none' }} tabIndex={-1} aria-hidden="true" readOnly />
+
               <div>
                 <label className="block text-[11px] font-bold uppercase tracking-wider text-stone-300 mb-1">
                   Admin Email / Username
@@ -179,11 +183,14 @@ export default function AdminLoginPage() {
                   </div>
                   <input
                     type="text"
+                    name="admin_user_input_field"
                     required
+                    readOnly
+                    onFocus={(e) => e.target.removeAttribute('readonly')}
                     autoComplete="off"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="admin@boutique.sl"
+                    placeholder="Enter admin username"
                     className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/5 border border-white/15 text-white placeholder:text-stone-500 text-sm focus:outline-none focus:ring-2 focus:ring-[#c5a059]"
                   />
                 </div>
@@ -212,7 +219,10 @@ export default function AdminLoginPage() {
                   </div>
                   <input
                     type="password"
+                    name="admin_secret_pass_field"
                     required
+                    readOnly
+                    onFocus={(e) => e.target.removeAttribute('readonly')}
                     autoComplete="new-password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -221,6 +231,7 @@ export default function AdminLoginPage() {
                   />
                 </div>
               </div>
+
 
               <button
 
