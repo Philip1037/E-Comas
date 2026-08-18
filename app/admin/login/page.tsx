@@ -24,11 +24,11 @@ export default function AdminLoginPage() {
   const [activePin, setActivePin] = useState('');
 
   useEffect(() => {
+    setEmail('');
+    setPassword('');
     const settings = getStoredSettings();
     setRecoveryEmail(settings.admin_recovery_email || 'philipbangura1037@gmail.com');
   }, []);
-
-
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -168,7 +168,7 @@ export default function AdminLoginPage() {
 
           {/* Mode 1: Standard Login */}
           {mode === 'login' && (
-            <form onSubmit={handleLogin} className="space-y-4">
+            <form onSubmit={handleLogin} autoComplete="off" className="space-y-4">
               <div>
                 <label className="block text-[11px] font-bold uppercase tracking-wider text-stone-300 mb-1">
                   Admin Email / Username
@@ -180,6 +180,7 @@ export default function AdminLoginPage() {
                   <input
                     type="text"
                     required
+                    autoComplete="off"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="admin@boutique.sl"
@@ -212,13 +213,15 @@ export default function AdminLoginPage() {
                   <input
                     type="password"
                     required
+                    autoComplete="new-password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
+                    placeholder="Enter secret password"
                     className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/5 border border-white/15 text-white placeholder:text-stone-500 text-sm focus:outline-none focus:ring-2 focus:ring-[#c5a059]"
                   />
                 </div>
               </div>
+           </div>
 
               <button
                 type="submit"
