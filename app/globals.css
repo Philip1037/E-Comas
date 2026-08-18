@@ -1,0 +1,202 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --primary-rose: #d47a82;
+    --primary-gold: #c5a059;
+    --dark-obsidian: #121013;
+    --warm-cream: #faf7f2;
+    --soft-blush: #fcf4f4;
+    --sand-accent: #f0e6d6;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: #faf8f5;
+    color: #1a171b;
+    /* Alibaba.com Official Global Font Stack */
+    font-family: "Roboto", "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: "Roboto", "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    letter-spacing: -0.01em;
+  }
+}
+
+/* Match font-serif to Alibaba high-impact modern heading style */
+.font-serif {
+  font-family: "Roboto", "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif !important;
+}
+
+/* Custom Luxury Gold Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1ece4;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c5a059;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a98339;
+}
+
+/* Solid Opaque Header (Zero Bleed-through) */
+.glass-header {
+  background: #ffffff !important;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(230, 218, 204, 0.8);
+}
+
+.glass-dark {
+  background: rgba(18, 16, 19, 0.96);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* LUXURY ANIMATIONS & KEYFRAMES */
+
+/* 1. Shimmer & Shine Sweep */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes goldSweep {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.gold-gradient-text {
+  background: linear-gradient(135deg, #c5a059 0%, #fae6be 40%, #c5a059 70%, #9e7b39 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: goldSweep 6s ease infinite;
+}
+
+.rose-gradient-text {
+  background: linear-gradient(135deg, #b84358 0%, #ff8da1 50%, #8e2b3e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.shimmer-badge {
+  background: linear-gradient(90deg, rgba(197,160,89,0.15) 0%, rgba(255,255,255,0.6) 50%, rgba(197,160,89,0.15) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 2.5s infinite;
+}
+
+/* 2. Floating Badges & Orbs */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-7px);
+  }
+}
+
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(1.5deg);
+  }
+}
+
+.animate-float {
+  animation: float 3.5s ease-in-out infinite;
+}
+
+.animate-float-slow {
+  animation: floatSlow 6s ease-in-out infinite;
+}
+
+/* 3. Pulsing Ambient Glow */
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.06);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 4s ease-in-out infinite;
+}
+
+/* 4. Subtle Category Ring Rotation */
+@keyframes spinSlow {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spinSlow 12s linear infinite;
+}
+
+/* 5. Product Card 3D Lift & Golden Hover Glow */
+.product-card-hover {
+  transition: all 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.product-card-hover:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(197, 160, 89, 0.35);
+}
+
+/* 6. Smooth Image Zoom */
+.image-zoom {
+  transition: transform 0.65s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.image-zoom:hover {
+  transform: scale(1.06);
+}
+
+/* 7. Button Click Pop */
+.btn-pop {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-pop:active {
+  transform: scale(0.95);
+}

@@ -1,0 +1,4 @@
+{
+    "requestflow.rootDirectory": ".requestsflow",
+    "locust.autoSetup": "never"
+}

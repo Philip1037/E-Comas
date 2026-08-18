@@ -1,0 +1,35 @@
+{
+  "folders": [
+    {
+      "name": "",
+      "timers": [
+        {
+          "id": "6fbf6653-df24-4898-b56b-d2208814b0b1",
+          "label": "Branch: main",
+          "startTime": "2026-08-18T00:09:25.827Z",
+          "archived": false,
+          "branchName": "main",
+          "subtimers": [
+            {
+              "id": "b92470b2-24cb-4f2a-811d-084ca0cd9d6e",
+              "label": "Session 1:",
+              "startTime": "2026-08-18T00:09:25.847Z",
+              "totalElapsedTime": 0,
+              "lastResumeTime": "2026-08-18T00:09:25.847Z",
+              "lastPersistedElapsedTime": 196204
+            }
+          ],
+          "logs": [
+            "12:09:25 AM - Branch timer created for \"main\"",
+            "12:09:25 AM - VS Code opened and started",
+            "12:09:25 AM - [Session 1:] - Started"
+          ]
+        }
+      ],
+      "subfolders": []
+    }
+  ],
+  "ignoredBranches": [],
+  "autoCreateOnBranchCheckout": true,
+  "enabled": true
+}

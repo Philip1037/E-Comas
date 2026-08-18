@@ -1,0 +1,74 @@
+{
+  "folders": [
+    {
+      "name": "Samples",
+      "icon": "$(beaker)",
+      "commands": [
+        {
+          "id": "hello-world",
+          "label": "Echo Hello",
+          "command": "echo \"Hello from Task and Documentation Hub\"",
+          "terminal": {
+            "type": "vscode-new",
+            "name": "Task and Documentation Hub"
+          },
+          "description": "Sample command that echoes a welcome message"
+        },
+        {
+          "id": "build-environment",
+          "label": "Build for environment",
+          "command": "npm run build -- --env $ENVIRONMENT_NAME $input:helptext=\"This is a helptext that will appear to the user when the input is asked\"",
+          "terminal": {
+            "type": "vscode-current"
+          },
+          "variables": [
+            {
+              "key": "ENVIRONMENT_NAME",
+              "value": "production\ndevelopment\nstaging",
+              "label": "Environment",
+              "type": "options"
+            }
+          ],
+          "description": "Builds the project using one of the configured environments"
+        }
+      ]
+    }
+  ],
+  "testRunners": [
+    {
+      "id": "test-runner-default",
+      "activated": false,
+      "title": "Sample Configuration",
+      "fileType": "javascript",
+      "workingDirectory": "",
+      "fileNamePattern": "test_*\n*test*\n*.spec.*",
+      "testNamePattern": "*",
+      "ignoreList": "",
+      "runTestCommand": "npm test -- $test_name",
+      "terminalName": "Test Runner",
+      "allowNonTest": false,
+      "autoFind": true,
+      "inlineButton": true
+    }
+  ],
+  "sharedVariables": [
+    {
+      "key": "PROJECT_ROOT",
+      "label": "Project root",
+      "value": "${workspaceFolder}",
+      "description": "Path to the current workspace folder"
+    }
+  ],
+  "sharedLists": [
+    {
+      "key": "ENVIRONMENT_NAME",
+      "label": "Environment",
+      "options": [
+        "local",
+        "staging",
+        "production"
+      ],
+      "description": "Common deployment targets"
+    }
+  ]
+}

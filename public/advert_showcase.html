@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Maison Lumière - Official Advert Video Player</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Roboto:ital,wght@0,300;0,400;0,500;0,700;0,900;1,400;1,700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Roboto', 'Open Sans', sans-serif; }
+    .font-serif { font-family: 'Roboto', 'Open Sans', sans-serif; font-weight: 700; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .gold-gradient { background: linear-gradient(135deg, #dfba73 0%, #c5a059 50%, #9e7b39 100%); }
+    .gold-text { background: linear-gradient(135deg, #f7e6c4 0%, #dfba73 50%, #c5a059 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .glass-panel { background: rgba(22, 19, 26, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(223, 186, 115, 0.25); }
+    .pulse-glow { animation: pulseGlow 3s infinite ease-in-out; }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 25px rgba(197, 160, 89, 0.25); }
+      50% { box-shadow: 0 0 50px rgba(197, 160, 89, 0.5); }
+    }
+  </style>
+</head>
+<body class="bg-[#0b0a0d] text-stone-200 min-h-screen antialiased selection:bg-[#c5a059] selection:text-black">
+
+  <!-- TOP HEADER -->
+  <header class="border-b border-white/10 bg-[#131016]/95 sticky top-0 z-50 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl gold-gradient flex items-center justify-center text-black font-bold font-serif text-xl shadow-lg">
+          ML
+        </div>
+        <div>
+          <h1 class="font-serif text-xl font-bold tracking-wider text-white">MAISON LUMIÈRE</h1>
+          <p class="text-[11px] text-[#c5a059] font-medium tracking-widest uppercase">Official Client Advert Video</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <a href="/" target="_blank" class="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-semibold border border-white/10 text-stone-300 transition-all">
+          Open Live Store ↗
+        </a>
+        <a href="/admin" target="_blank" class="px-4 py-2 rounded-xl gold-gradient hover:brightness-110 text-black text-xs font-bold transition-all shadow-md">
+          Open Admin Panel ↗
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN VIDEO SHOWCASE SECTION -->
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-10">
+
+    <!-- ADVERT VIDEO PLAYER CONTAINER -->
+    <section class="glass-panel rounded-3xl p-4 sm:p-8 space-y-6 pulse-glow">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#c5a059]/15 border border-[#c5a059]/30 text-[#c5a059] text-xs font-semibold mb-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>HD Advert Video &bull; Live Voiceover Narration</span>
+          </div>
+          <h2 class="font-serif text-2xl sm:text-3xl font-bold text-white">
+            Maison Lumière Commercial &amp; Platform Walkthrough
+          </h2>
+        </div>
+
+        <!-- Download / Export Video Button -->
+        <button id="downloadBtn" onclick="exportAdvertVideo()" class="px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-2 transition-all shadow-lg active:scale-95 cursor-pointer">
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
+          <span id="downloadBtnText">Download Advert Video (.webm)</span>
+        </button>
+      </div>
+
+      <!-- VIDEO CANVAS SCREEN -->
+      <div class="relative w-full aspect-video rounded-2xl overflow-hidden bg-black border border-[#c5a059]/30 shadow-2xl flex items-center justify-center">
+        <canvas id="videoCanvas" width="1280" height="720" class="w-full h-full object-contain"></canvas>
+
+        <!-- Big Center Play Overlay Button (if not playing) -->
+        <div id="playOverlay" onclick="startVideo()" class="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center cursor-pointer group transition-all">
+          <div class="w-20 h-20 rounded-full gold-gradient flex items-center justify-center text-black shadow-2xl group-hover:scale-110 transition-transform">
+            <svg class="w-10 h-10 fill-current translate-x-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          </div>
+          <p class="font-serif text-xl font-bold text-white mt-4 tracking-wide">Click to Play Advert Video</p>
+          <p class="text-xs text-[#c5a059] mt-1">Includes Voiceover Narration &amp; Live Animated Scenes</p>
+        </div>
+      </div>
+
+      <!-- PLAYBACK CONTROLS BAR -->
+      <div class="p-4 rounded-2xl bg-black/60 border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3 w-full sm:w-auto">
+          <button id="ctrlPlayBtn" onclick="togglePlay()" class="p-3 rounded-xl gold-gradient text-black font-bold hover:opacity-90 transition-all cursor-pointer">
+            <svg id="ctrlPlayIcon" class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+
+          <button onclick="restartVideo()" class="p-3 rounded-xl bg-white/10 hover:bg-white/15 text-stone-300 transition-all cursor-pointer" title="Replay from start">
+            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+          </button>
+
+          <div class="text-xs font-mono text-stone-300">
+            <span id="timeDisplay">00:00</span> / <span id="durationDisplay">01:40</span>
+          </div>
+        </div>
+
+        <!-- Scene Indicator Buttons -->
+        <div class="flex items-center gap-2 overflow-x-auto w-full sm:w-auto">
+          <button onclick="seekToScene(0)" class="scene-tab px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs text-stone-300 border border-white/10 font-medium">1. Intro</button>
+          <button onclick="seekToScene(1)" class="scene-tab px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs text-stone-300 border border-white/10 font-medium">2. Customer Store</button>
+          <button onclick="seekToScene(2)" class="scene-tab px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs text-stone-300 border border-white/10 font-medium">3. Admin Back-End</button>
+          <button onclick="seekToScene(3)" class="scene-tab px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs text-stone-300 border border-white/10 font-medium">4. Outro</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP-BY-STEP ADVERT CONTENT GUIDE -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="glass-panel p-6 sm:p-8 rounded-3xl space-y-4">
+        <h3 class="font-serif text-xl font-bold text-white flex items-center gap-2">
+          <span class="w-7 h-7 rounded-lg gold-gradient text-black flex items-center justify-center font-bold text-xs">01</span>
+          <span>Customer Experience in Video</span>
+        </h3>
+        <p class="text-xs text-stone-400 leading-relaxed">
+          Shows how customers browse the high-end boutique, filter dresses and cosmetics, view prices in Sierra Leone Leones (SLE), and check out directly via <strong>Orange Money</strong>, <strong>AfriMoney</strong>, or <strong>WhatsApp</strong>.
+        </p>
+        <a href="/" target="_blank" class="inline-block text-xs text-[#c5a059] font-bold hover:underline">
+          Visit Live Storefront →
+        </a>
+      </div>
+
+      <div class="glass-panel p-6 sm:p-8 rounded-3xl space-y-4">
+        <h3 class="font-serif text-xl font-bold text-white flex items-center gap-2">
+          <span class="w-7 h-7 rounded-lg bg-white/20 text-white flex items-center justify-center font-bold text-xs">02</span>
+          <span>Admin &amp; Product Uploads in Video</span>
+        </h3>
+        <p class="text-xs text-stone-400 leading-relaxed">
+          Demonstrates the owner's dashboard: uploading new fashion &amp; cosmetic items, 1-click in-stock toggling, reviewing customer orders, and sending 1-tap VIP broadcasts to customers on WhatsApp.
+        </p>
+        <a href="/admin" target="_blank" class="inline-block text-xs text-[#c5a059] font-bold hover:underline">
+          Visit Admin Portal →
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- VIDEO RENDERING & VOICE SYNTHESIS ENGINE -->
+  <script>
+    const canvas = document.getElementById('videoCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const scenes = [
+      {
+        id: 0,
+        title: "MAISON LUMIÈRE",
+        subtitle: "Luxury Women's Couture & Botanical Cosmetics",
+        badge: "OFFICIAL COMMERCIAL & WALKTHROUGH",
+        duration: 15,
+        script: "Welcome to Maison Lumière — Sierra Leone's premier digital boutique for luxury couture and glowing botanical cosmetics. Designed with elegance in mind, the storefront gives customers a world-class shopping experience right from their phones or laptops.",
+        type: "hero",
+        accent: "#dfba73"
+      },
+      {
+        id: 1,
+        title: "SEAMLESS SHOPPING & MOBILE PAYMENTS",
+        subtitle: "Orange Money • AfriMoney • WhatsApp Instant Checkout",
+        badge: "FRONT-END CUSTOMER EXPERIENCE",
+        duration: 30,
+        script: "Customers can browse runway dresses, 24K gold serums, and new batch drops with zero friction. Clicking any item opens rich product specs, pricing in SLE, and stock levels. Adding to bag triggers our sleek cart drawer, where customers can check out via Orange Money, AfriMoney, or Cash on Delivery — routing their exact order breakdown straight to your WhatsApp!",
+        type: "store",
+        accent: "#10b981"
+      },
+      {
+        id: 2,
+        title: "EFFORTLESS INVENTORY & ADMIN DASHBOARD",
+        subtitle: "Instant Product Uploads • Stock Toggles • VIP Broadcasts",
+        badge: "BACK-END OWNER MANAGEMENT",
+        duration: 35,
+        script: "Managing your boutique is completely effortless. Log into your protected Admin Portal to upload new items in seconds, toggle out-of-stock badges with one click, manage customer orders, and trigger 1-tap VIP broadcasts to all subscribed customers on WhatsApp!",
+        type: "admin",
+        accent: "#c5a059"
+      },
+      {
+        id: 3,
+        title: "ELEVATE YOUR FASHION BUSINESS",
+        subtitle: "Maison Lumière is Live & Ready for Orders",
+        badge: "START SELLING TODAY",
+        duration: 20,
+        script: "Maison Lumière is fully responsive, lightning fast, and tailored for modern commerce in Sierra Leone and beyond. Visit Maison Lumière today and elevate your fashion and beauty journey.",
+        type: "outro",
+        accent: "#dfba73"
+      }
+    ];
+
+    let currentSceneIdx = 0;
+    let isPlaying = false;
+    let isRecording = false;
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    let startTime = 0;
+    let sceneStartTime = 0;
+    let animationFrameId = null;
+    let synth = window.speechSynthesis;
+    let currentUtterance = null;
+
+    // Preload Sample Images for Canvas Video
+    const imgDress = new Image();
+    imgDress.crossOrigin = "anonymous";
+    imgDress.src = "https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=600&q=80";
+
+    const imgSerum = new Image();
+    imgSerum.crossOrigin = "anonymous";
+    imgSerum.src = "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=600&q=80";
+
+    const imgVelvet = new Image();
+    imgVelvet.crossOrigin = "anonymous";
+    imgVelvet.src = "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&w=600&q=80";
+
+    function drawVideoFrame(timeSec) {
+      const scene = scenes[currentSceneIdx];
+      const elapsedInScene = timeSec - sceneStartTime;
+      const progress = Math.min(1, elapsedInScene / scene.duration);
+
+      // Background Gradient
+      const grad = ctx.createRadialGradient(640, 360, 50, 640, 360, 700);
+      grad.addColorStop(0, '#1c1722');
+      grad.addColorStop(1, '#09080c');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 1280, 720);
+
+      // Ambient Glowing Rings
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(640 + Math.sin(timeSec) * 30, 360 + Math.cos(timeSec) * 20, 280, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(223, 186, 115, 0.08)';
+      ctx.lineWidth = 40;
+      ctx.stroke();
+      ctx.restore();
+
+      // Top Brand Bar
+      ctx.fillStyle = "rgba(0,0,0,0.5)";
+      ctx.fillRect(0, 0, 1280, 70);
+      ctx.strokeStyle = "rgba(255,255,255,0.1)";
+      ctx.strokeRect(0, 0, 1280, 70);
+
+      // Brand Logo on Top Left
+      ctx.fillStyle = "#dfba73";
+      ctx.font = "bold 24px 'Cormorant Garamond', Georgia, serif";
+      ctx.fillText("MAISON LUMIÈRE", 50, 44);
+
+      ctx.fillStyle = "#888";
+      ctx.font = "12px 'Plus Jakarta Sans', sans-serif";
+      ctx.fillText("EXCLUSIVE COUTURE & COSMETICS", 260, 42);
+
+      // Top Right Badge
+      ctx.fillStyle = scene.accent;
+      ctx.font = "bold 13px 'Plus Jakarta Sans', sans-serif";
+      ctx.fillText(scene.badge, 1280 - ctx.measureText(scene.badge).width - 50, 42);
+
+      // SCENE CONTENT RENDERING
+      if (scene.type === "hero") {
+        // Hero visual scene
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 56px 'Cormorant Garamond', Georgia, serif";
+        ctx.textAlign = "center";
+        ctx.fillText("MAISON LUMIÈRE", 640, 240);
+
+        ctx.fillStyle = "#dfba73";
+        ctx.font = "20px 'Plus Jakarta Sans', sans-serif";
+        ctx.fillText("Exclusive Women's Couture & Luxury Botanical Cosmetics", 640, 290);
+
+        // Feature cards
+        drawCard(220, 350, 260, 200, "High Fashion", "Runway Dresses & Sets", imgDress);
+        drawCard(510, 350, 260, 200, "24K Skincare", "Botanical Glow Serums", imgSerum);
+        drawCard(800, 350, 260, 200, "Velvet Wraps", "Evening Cocktails", imgVelvet);
+        ctx.textAlign = "left";
+
+      } else if (scene.type === "store") {
+        // Customer store flow
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 44px 'Cormorant Garamond', Georgia, serif";
+        ctx.fillText("Seamless Customer Shopping Experience", 640, 160);
+
+        ctx.fillStyle = "#10b981";
+        ctx.font = "16px 'Plus Jakarta Sans', sans-serif";
+        ctx.fillText("Interactive Cart • Instant WhatsApp Routing • Sierra Leone Mobile Money", 640, 200);
+
+        // Draw Interactive Mockup Panels
+        drawMockPanel(180, 250, 420, 300, "🛍️ Customer Bag & Checkout", [
+          "• Aura Silk Tiered Maxi Gown (Qty: 1) - SLE 650.00",
+          "• 24K Radiance Glow Serum (Qty: 1) - SLE 240.00",
+          "----------------------------------------",
+          "Grand Total: SLE 890.00 (Free Delivery Applied)",
+          "Payment Method: Orange Money (076 889 900)"
+        ]);
+
+        drawMockPanel(680, 250, 420, 300, "📲 Auto WhatsApp Order Lead", [
+          "To: Maison Lumière Concierge (+232 76 889 900)",
+          "Order Ref: #ML-78921",
+          "Customer: Sarah Taylor (+232 76 123 456)",
+          "Address: 12 Wilkinson Road, Freetown",
+          "Status: Order placed & ready for fulfillment!"
+        ]);
+        ctx.textAlign = "left";
+
+      } else if (scene.type === "admin") {
+        // Admin scene
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 44px 'Cormorant Garamond', Georgia, serif";
+        ctx.fillText("Back-End Owner Management Portal", 640, 160);
+
+        ctx.fillStyle = "#dfba73";
+        ctx.font = "16px 'Plus Jakarta Sans', sans-serif";
+        ctx.fillText("Upload Products in Seconds • 1-Click Stock Toggle • VIP Broadcasts", 640, 200);
+
+        drawMockPanel(180, 250, 420, 300, "📦 Product Catalog & Pricing", [
+          "[+] Add New Boutique Item",
+          "• Set Price in SLE (e.g. SLE 480.00)",
+          "• Upload multi-angle photos",
+          "• Toggle [In Stock / Out of Stock] instantly",
+          "• Categorize: Dresses, Skincare, Batch Drops"
+        ]);
+
+        drawMockPanel(680, 250, 420, 300, "📢 VIP WhatsApp Broadcast", [
+          "Recipient List: All VIP Subscribers",
+          "Payload: '✨ New Batch Arrival: 24K Serum!'",
+          "• 1-Tap broadcast dispatch to WhatsApp leads",
+          "• Track orders and fulfillment status in real-time"
+        ]);
+        ctx.textAlign = "left";
+
+      } else if (scene.type === "outro") {
+        // Outro CTA
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#dfba73";
+        ctx.font = "bold 20px 'Plus Jakarta Sans', sans-serif";
+        ctx.fillText("MAISON LUMIÈRE IS READY FOR CUSTOMERS", 640, 240);
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 56px 'Cormorant Garamond', Georgia, serif";
+        ctx.fillText("Elevate Your Boutique Today", 640, 310);
+
+        ctx.fillStyle = "#aaa";
+        ctx.font = "18px 'Plus Jakarta Sans', sans-serif";
+        ctx.fillText("Visit http://localhost:3000 to shop and explore", 640, 360);
+        ctx.textAlign = "left";
+      }
+
+      // Bottom Subtitles Box
+      ctx.fillStyle = "rgba(0,0,0,0.85)";
+      ctx.fillRect(80, 580, 1120, 95);
+      ctx.strokeStyle = "rgba(223, 186, 115, 0.4)";
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(80, 580, 1120, 95);
+
+      // Voiceover Subtitle Text
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "15px 'Plus Jakarta Sans', sans-serif";
+      wrapText(ctx, `🎙️ VOICEOVER: "${scene.script}"`, 110, 615, 1060, 24);
+
+      // Timeline Progress Line
+      const totalDuration = scenes.reduce((a, b) => a + b.duration, 0);
+      const totalElapsed = scenes.slice(0, currentSceneIdx).reduce((a, b) => a + b.duration, 0) + elapsedInScene;
+      const totalProgress = Math.min(1, totalElapsed / totalDuration);
+
+      ctx.fillStyle = "#dfba73";
+      ctx.fillRect(0, 715, 1280 * totalProgress, 5);
+
+      // Update Time Display
+      document.getElementById('timeDisplay').innerText = formatTime(totalElapsed);
+    }
+
+    function drawCard(x, y, w, h, title, sub, img) {
+      ctx.save();
+      ctx.fillStyle = "rgba(255,255,255,0.05)";
+      ctx.strokeStyle = "rgba(223, 186, 115, 0.3)";
+      ctx.fillRect(x, y, w, h);
+      ctx.strokeRect(x, y, w, h);
+
+      if (img && img.complete) {
+        ctx.drawImage(img, x + 15, y + 15, w - 30, h - 80);
+      }
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 16px 'Plus Jakarta Sans', sans-serif";
+      ctx.fillText(title, x + 15, y + h - 35);
+
+      ctx.fillStyle = "#c5a059";
+      ctx.font = "12px 'Plus Jakarta Sans', sans-serif";
+      ctx.fillText(sub, x + 15, y + h - 15);
+      ctx.restore();
+    }
+
+    function drawMockPanel(x, y, w, h, heading, lines) {
+      ctx.save();
+      ctx.fillStyle = "rgba(10, 8, 13, 0.8)";
+      ctx.strokeStyle = "rgba(255,255,255,0.15)";
+      ctx.fillRect(x, y, w, h);
+      ctx.strokeRect(x, y, w, h);
+
+      ctx.fillStyle = "#dfba73";
+      ctx.font = "bold 15px 'Plus Jakarta Sans', sans-serif";
+      ctx.fillText(heading, x + 20, y + 35);
+
+      ctx.fillStyle = "#d1d5db";
+      ctx.font = "13px 'JetBrains Mono', monospace";
+      lines.forEach((line, i) => {
+        ctx.fillText(line, x + 20, y + 75 + i * 26);
+      });
+      ctx.restore();
+    }
+
+    function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+      const words = text.split(' ');
+      let line = '';
+
+      for (let n = 0; n < words.length; n++) {
+        const testLine = line + words[n] + ' ';
+        const metrics = ctx.measureText(testLine);
+        const testWidth = metrics.width;
+        if (testWidth > maxWidth && n > 0) {
+          ctx.fillText(line, x, y);
+          line = words[n] + ' ';
+          y += lineHeight;
+        } else {
+          line = testLine;
+        }
+      }
+      ctx.fillText(line, x, y);
+    }
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function updateSceneHighlight() {
+      const tabs = document.querySelectorAll('.scene-tab');
+      tabs.forEach((t, i) => {
+        if (i === currentSceneIdx) {
+          t.classList.add('bg-[#c5a059]/25', 'border-[#c5a059]/60', 'text-[#c5a059]');
+        } else {
+          t.classList.remove('bg-[#c5a059]/25', 'border-[#c5a059]/60', 'text-[#c5a059]');
+        }
+      });
+    }
+
+    function speakScene(idx) {
+      if (!synth) return;
+      synth.cancel();
+      const s = scenes[idx];
+      currentUtterance = new SpeechSynthesisUtterance(s.script);
+      currentUtterance.rate = 0.95;
+      currentUtterance.pitch = 1.0;
+      synth.speak(currentUtterance);
+    }
+
+    function loop() {
+      if (!isPlaying) return;
+      const now = performance.now() / 1000;
+      const elapsedInScene = now - sceneStartTime;
+      const scene = scenes[currentSceneIdx];
+
+      if (elapsedInScene >= scene.duration) {
+        if (currentSceneIdx < scenes.length - 1) {
+          currentSceneIdx++;
+          sceneStartTime = now;
+          updateSceneHighlight();
+          speakScene(currentSceneIdx);
+        } else {
+          // Finished
+          pauseVideo();
+          return;
+        }
+      }
+
+      drawVideoFrame(now);
+      animationFrameId = requestAnimationFrame(loop);
+    }
+
+    function startVideo() {
+      document.getElementById('playOverlay').style.display = 'none';
+      isPlaying = true;
+      startTime = performance.now() / 1000;
+      sceneStartTime = startTime;
+      updateSceneHighlight();
+      speakScene(currentSceneIdx);
+      document.getElementById('ctrlPlayIcon').innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+      loop();
+    }
+
+    function pauseVideo() {
+      isPlaying = false;
+      if (synth) synth.cancel();
+      cancelAnimationFrame(animationFrameId);
+      document.getElementById('ctrlPlayIcon').innerHTML = '<path d="M8 5v14l11-7z"/>';
+      if (isRecording && mediaRecorder && mediaRecorder.state === "recording") {
+        mediaRecorder.stop();
+      }
+    }
+
+    function togglePlay() {
+      if (isPlaying) {
+        pauseVideo();
+      } else {
+        document.getElementById('playOverlay').style.display = 'none';
+        isPlaying = true;
+        sceneStartTime = (performance.now() / 1000);
+        document.getElementById('ctrlPlayIcon').innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+        speakScene(currentSceneIdx);
+        loop();
+      }
+    }
+
+    function restartVideo() {
+      pauseVideo();
+      currentSceneIdx = 0;
+      updateSceneHighlight();
+      drawVideoFrame(0);
+      togglePlay();
+    }
+
+    function seekToScene(idx) {
+      currentSceneIdx = idx;
+      updateSceneHighlight();
+      sceneStartTime = performance.now() / 1000;
+      if (isPlaying) {
+        speakScene(idx);
+      }
+      drawVideoFrame(sceneStartTime);
+    }
+
+    // EXPORT & DOWNLOAD VIDEO
+    function exportAdvertVideo() {
+      const stream = canvas.captureStream(30);
+      recordedChunks = [];
+
+      try {
+        mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9' });
+      } catch (e) {
+        mediaRecorder = new MediaRecorder(stream);
+      }
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) recordedChunks.push(e.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(recordedChunks, { type: 'video/webm' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'Maison_Lumiere_Advert_Video.webm';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        document.getElementById('downloadBtnText').innerText = "Download Advert Video (.webm)";
+      };
+
+      isRecording = true;
+      document.getElementById('downloadBtnText').innerText = "Recording Video... (Playing)";
+      mediaRecorder.start();
+      restartVideo();
+    }
+
+    // Initial canvas render
+    updateSceneHighlight();
+    drawVideoFrame(0);
+  </script>
+</body>
+</html>

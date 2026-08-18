@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Maison Lumière - Multi-Device Phone &amp; Web Simulator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Roboto:ital,wght@0,300;0,400;0,500;0,700;0,900;1,400;1,700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Roboto', 'Open Sans', sans-serif; }
+    .font-serif { font-family: 'Roboto', 'Open Sans', sans-serif; font-weight: 700; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .gold-gradient { background: linear-gradient(135deg, #dfba73 0%, #c5a059 50%, #9e7b39 100%); }
+    .gold-text { background: linear-gradient(135deg, #f7e6c4 0%, #dfba73 50%, #c5a059 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    
+    /* Device Frame Stylings with Realistic Chassis Shadows */
+    .iphone-frame {
+      box-shadow: 0 0 0 10px #2a2530, 0 0 0 12px #4a4155, 0 25px 60px -10px rgba(0, 0, 0, 0.85);
+      border-radius: 46px;
+    }
+    .android-frame {
+      box-shadow: 0 0 0 8px #1f1d24, 0 0 0 10px #3c3746, 0 25px 60px -10px rgba(0, 0, 0, 0.85);
+      border-radius: 28px;
+    }
+    .tablet-frame {
+      box-shadow: 0 0 0 12px #1e1b24, 0 0 0 14px #3d3748, 0 30px 70px -10px rgba(0, 0, 0, 0.9);
+      border-radius: 32px;
+    }
+    .laptop-frame {
+      box-shadow: 0 0 0 10px #242229, 0 25px 70px -10px rgba(0, 0, 0, 0.9);
+      border-radius: 16px 16px 4px 4px;
+    }
+    
+    /* Center scaling container */
+    #scaleStage {
+      transform-origin: center center;
+      transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+  </style>
+</head>
+<body class="bg-[#0b0a0d] text-stone-200 h-screen flex flex-col antialiased selection:bg-[#c5a059] selection:text-black overflow-hidden select-none">
+
+  <!-- TOP CONTROL BAR -->
+  <header class="bg-[#141117] border-b border-white/10 px-4 py-2.5 shrink-0 z-30 flex flex-wrap items-center justify-between gap-3">
+    
+    <!-- Brand & Title -->
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-xl gold-gradient flex items-center justify-center text-black font-bold font-serif text-sm shadow-md">
+        ML
+      </div>
+      <div>
+        <h1 class="font-serif text-sm font-bold tracking-wide text-white flex items-center gap-2">
+          <span>Device Emulator</span>
+          <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-mono font-bold">100% VIEWABLE</span>
+        </h1>
+      </div>
+    </div>
+
+    <!-- Device Selectors -->
+    <div class="flex items-center gap-1 p-1 rounded-xl bg-black/50 border border-white/10">
+      <button onclick="setDevice('iphone')" id="btn-iphone" class="device-btn px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 bg-[#c5a059] text-black shadow cursor-pointer">
+        <span>📱 iPhone 15 Pro</span>
+      </button>
+      <button onclick="setDevice('android')" id="btn-android" class="device-btn px-3 py-1.5 rounded-lg text-xs font-medium text-stone-400 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer">
+        <span>📱 Samsung S24</span>
+      </button>
+      <button onclick="setDevice('tablet')" id="btn-tablet" class="device-btn px-3 py-1.5 rounded-lg text-xs font-medium text-stone-400 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer">
+        <span>📟 iPad Air</span>
+      </button>
+      <button onclick="setDevice('desktop')" id="btn-desktop" class="device-btn px-3 py-1.5 rounded-lg text-xs font-medium text-stone-400 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer">
+        <span>💻 MacBook / PC</span>
+      </button>
+    </div>
+
+    <!-- Scale / Zoom Mode Controls (Auto-fit Screen) -->
+    <div class="flex items-center gap-1.5 bg-black/40 border border-white/10 px-2 py-1 rounded-xl">
+      <span class="text-[11px] text-stone-400 font-semibold mr-1">Zoom:</span>
+      <button onclick="setScaleMode('auto')" id="zoom-auto" class="zoom-btn px-2.5 py-1 rounded-lg text-[11px] font-bold bg-[#c5a059] text-black transition-all cursor-pointer">
+        🔍 Auto-Fit Full Device
+      </button>
+      <button onclick="setScaleMode(0.85)" id="zoom-85" class="zoom-btn px-2 py-1 rounded-lg text-[11px] text-stone-400 hover:text-white transition-all cursor-pointer">
+        85%
+      </button>
+      <button onclick="setScaleMode(1.0)" id="zoom-100" class="zoom-btn px-2 py-1 rounded-lg text-[11px] text-stone-400 hover:text-white transition-all cursor-pointer">
+        100% (1:1)
+      </button>
+    </div>
+
+    <!-- Page Switcher & Tools -->
+    <div class="flex items-center gap-2">
+      <select id="urlSelect" onchange="changeUrl(this.value)" class="px-3 py-1.5 rounded-xl bg-white/10 border border-white/15 text-xs text-stone-100 focus:outline-none focus:ring-2 focus:ring-[#c5a059] cursor-pointer">
+        <option value="/" class="bg-[#141117]">🛍️ Storefront</option>
+        <option value="/admin" class="bg-[#141117]">⚙️ Admin Overview</option>
+        <option value="/admin/products" class="bg-[#141117]">📦 Admin Inventory</option>
+        <option value="/admin/orders" class="bg-[#141117]">🛒 Admin Orders</option>
+        <option value="/advert_showcase.html" class="bg-[#141117]">🎬 Advert Video</option>
+      </select>
+
+      <!-- Rotate Orientation -->
+      <button onclick="toggleOrientation()" class="p-1.5 px-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-stone-300 border border-white/10 text-xs font-semibold transition-all cursor-pointer" title="Rotate portrait/landscape">
+        🔄 Rotate
+      </button>
+
+      <!-- Refresh -->
+      <button onclick="refreshIframe()" class="p-1.5 px-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-stone-300 border border-white/10 text-xs font-semibold transition-all cursor-pointer" title="Reload iframe">
+        ⚡ Reload
+      </button>
+    </div>
+
+  </header>
+
+  <!-- WORKSPACE EMULATION CANVAS -->
+  <main id="canvasContainer" class="flex-1 overflow-hidden flex items-center justify-center p-4 relative bg-[radial-gradient(#261f2f_1px,transparent_1px)] [background-size:24px_24px]">
+
+    <!-- Scale Stage for Full Device Visibility -->
+    <div id="scaleStage" class="flex flex-col items-center justify-center">
+
+      <!-- Complete Device Wrapper with Realistic Chassis -->
+      <div id="deviceWrapper" class="iphone-frame bg-black relative flex flex-col overflow-hidden" style="width: 393px; height: 852px;">
+        
+        <!-- Laptop Top Window Header (Only in Laptop / Desktop mode) -->
+        <div id="laptopWindowBar" class="h-7 bg-[#1c1a22] border-b border-white/10 px-3 flex items-center justify-between select-none" style="display: none;">
+          <div class="flex items-center gap-1.5">
+            <span class="w-3 h-3 rounded-full bg-[#ff5f56]"></span>
+            <span class="w-3 h-3 rounded-full bg-[#ffbd2e]"></span>
+            <span class="w-3 h-3 rounded-full bg-[#27c93f]"></span>
+          </div>
+          <span class="text-[10px] font-mono text-stone-400">maisonlumiere.sl — Storefront</span>
+          <div class="w-10"></div>
+        </div>
+
+        <!-- Top Dynamic Island (iPhone Mode) -->
+        <div id="deviceNotch" class="absolute top-2.5 left-1/2 -translate-x-1/2 w-28 h-7 bg-black rounded-full z-40 flex items-center justify-between px-3 shadow-inner pointer-events-none">
+          <div class="w-2.5 h-2.5 rounded-full bg-[#1b191e]"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-[#0a192f]/60 border border-white/10"></div>
+        </div>
+
+        <!-- Android Punch-hole Camera (Android Mode) -->
+        <div id="androidCamera" class="absolute top-3 left-1/2 -translate-x-1/2 w-4 h-4 bg-black rounded-full z-40 border border-stone-800 shadow-inner pointer-events-none" style="display: none;"></div>
+
+        <!-- Live Mobile Status Bar -->
+        <div id="statusBar" class="h-9 bg-white text-stone-900 px-6 pt-1.5 flex items-center justify-between text-[11px] font-bold tracking-tight z-30 pointer-events-none select-none border-b border-stone-100">
+          <span id="clockDisplay">9:41</span>
+          <div class="flex items-center gap-1.5 text-[11px]">
+            <span>5G</span>
+            <span>100%</span>
+          </div>
+        </div>
+
+        <!-- Web Content Frame -->
+        <iframe
+          id="previewFrame"
+          src="/"
+          class="flex-1 w-full h-full border-0 bg-white"
+          title="Interactive Device Preview"
+        ></iframe>
+
+        <!-- Bottom Home Indicator Bar (for iOS Phone & Tablet) -->
+        <div id="homeIndicator" class="h-4 bg-white flex items-center justify-center z-30 pointer-events-none select-none">
+          <div class="w-28 h-1 bg-stone-400 rounded-full"></div>
+        </div>
+
+      </div>
+
+      <!-- Laptop Base / Keyboard Chassis (Only in Desktop mode) -->
+      <div id="laptopBase" class="relative flex flex-col items-center" style="display: none; width: 1040px;">
+        <div class="w-full h-4 bg-gradient-to-b from-[#2e2b35] to-[#1e1b24] rounded-b-xl border-t border-white/20 shadow-2xl flex items-center justify-center">
+          <div class="w-20 h-1 bg-black/40 rounded-full"></div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- FOOTER STATUS & AUTO-SCALE INFO -->
+  <footer class="bg-[#141117] border-t border-white/10 px-4 py-2 text-center text-xs text-stone-500 flex items-center justify-between shrink-0">
+    <div class="flex items-center gap-2 font-mono text-[11px]">
+      <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+      <span id="viewportSpecs">iPhone 15 Pro &bull; 393 &times; 852 px</span>
+    </div>
+
+    <div class="text-[11px] text-stone-400 font-mono" id="scaleInfo">
+      Scaling: Auto-Fit (100% of device visible)
+    </div>
+  </footer>
+
+  <!-- SCRIPT ENGINE -->
+  <script>
+    const deviceConfigs = {
+      iphone: {
+        name: "iPhone 15 Pro",
+        width: 393,
+        height: 852,
+        frameClass: "iphone-frame",
+        hasNotch: true,
+        hasAndroidCam: false,
+        hasStatusBar: true,
+        hasHomeBar: true,
+        hasLaptopBar: false,
+        hasLaptopBase: false,
+      },
+      android: {
+        name: "Samsung Galaxy S24",
+        width: 412,
+        height: 915,
+        frameClass: "android-frame",
+        hasNotch: false,
+        hasAndroidCam: true,
+        hasStatusBar: true,
+        hasHomeBar: false,
+        hasLaptopBar: false,
+        hasLaptopBase: false,
+      },
+      tablet: {
+        name: "iPad Air (10.9\")",
+        width: 820,
+        height: 1100,
+        frameClass: "tablet-frame",
+        hasNotch: false,
+        hasAndroidCam: false,
+        hasStatusBar: true,
+        hasHomeBar: true,
+        hasLaptopBar: false,
+        hasLaptopBase: false,
+      },
+      desktop: {
+        name: "MacBook Pro / Desktop",
+        width: 980,
+        height: 620,
+        frameClass: "laptop-frame",
+        hasNotch: false,
+        hasAndroidCam: false,
+        hasStatusBar: false,
+        hasHomeBar: false,
+        hasLaptopBar: true,
+        hasLaptopBase: true,
+      }
+    };
+
+    let currentDevice = 'iphone';
+    let isLandscape = false;
+    let currentScaleMode = 'auto'; // 'auto', 0.85, 1.0
+
+    function setDevice(deviceKey) {
+      currentDevice = deviceKey;
+      isLandscape = false;
+      applyConfig();
+      updateButtons(deviceKey);
+    }
+
+    function toggleOrientation() {
+      if (currentDevice === 'desktop') return;
+      isLandscape = !isLandscape;
+      applyConfig();
+    }
+
+    function setScaleMode(mode) {
+      currentScaleMode = mode;
+      updateZoomButtons();
+      autoScaleDevice();
+    }
+
+    function updateZoomButtons() {
+      document.querySelectorAll('.zoom-btn').forEach(btn => {
+        btn.classList.remove('bg-[#c5a059]', 'text-black', 'font-bold');
+        btn.classList.add('text-stone-400');
+      });
+
+      if (currentScaleMode === 'auto') {
+        const b = document.getElementById('zoom-auto');
+        b?.classList.add('bg-[#c5a059]', 'text-black', 'font-bold');
+        b?.classList.remove('text-stone-400');
+      } else if (currentScaleMode === 0.85) {
+        const b = document.getElementById('zoom-85');
+        b?.classList.add('bg-[#c5a059]', 'text-black', 'font-bold');
+        b?.classList.remove('text-stone-400');
+      } else if (currentScaleMode === 1.0) {
+        const b = document.getElementById('zoom-100');
+        b?.classList.add('bg-[#c5a059]', 'text-black', 'font-bold');
+        b?.classList.remove('text-stone-400');
+      }
+    }
+
+    function autoScaleDevice() {
+      const container = document.getElementById('canvasContainer');
+      const stage = document.getElementById('scaleStage');
+      const wrapper = document.getElementById('deviceWrapper');
+      const scaleInfo = document.getElementById('scaleInfo');
+
+      if (!container || !stage || !wrapper) return;
+
+      const availWidth = container.clientWidth - 40;
+      const availHeight = container.clientHeight - 40;
+
+      const wrapperWidth = parseInt(wrapper.style.width, 10) || 393;
+      let wrapperHeight = parseInt(wrapper.style.height, 10) || 852;
+      if (currentDevice === 'desktop') {
+        wrapperHeight += 20; // account for laptop base
+      }
+
+      if (currentScaleMode === 'auto') {
+        const scaleX = availWidth / wrapperWidth;
+        const scaleY = availHeight / wrapperHeight;
+        let finalScale = Math.min(scaleX, scaleY, 0.98); // ensure slight padding
+        finalScale = Math.max(finalScale, 0.35); // minimum scale
+
+        stage.style.transform = `scale(${finalScale.toFixed(3)})`;
+        scaleInfo.innerText = `Zoom: Auto-Fit (${Math.round(finalScale * 100)}% scale - Full device in view)`;
+      } else {
+        const fixedScale = Number(currentScaleMode);
+        stage.style.transform = `scale(${fixedScale})`;
+        scaleInfo.innerText = `Zoom: ${Math.round(fixedScale * 100)}%`;
+      }
+    }
+
+    function applyConfig() {
+      const cfg = deviceConfigs[currentDevice];
+      const wrapper = document.getElementById('deviceWrapper');
+      const notch = document.getElementById('deviceNotch');
+      const androidCam = document.getElementById('androidCamera');
+      const statusBar = document.getElementById('statusBar');
+      const homeIndicator = document.getElementById('homeIndicator');
+      const laptopBar = document.getElementById('laptopWindowBar');
+      const laptopBase = document.getElementById('laptopBase');
+
+      let w = cfg.width;
+      let h = cfg.height;
+
+      if (isLandscape) {
+        w = cfg.height;
+        h = cfg.width;
+      }
+
+      wrapper.style.width = `${w}px`;
+      wrapper.style.height = `${h}px`;
+
+      // Set frame chassis class
+      wrapper.className = `${cfg.frameClass} bg-black relative flex flex-col overflow-hidden`;
+
+      // Notch / Camera / Status / Home Bar
+      notch.style.display = cfg.hasNotch && !isLandscape ? 'flex' : 'none';
+      androidCam.style.display = cfg.hasAndroidCam && !isLandscape ? 'block' : 'none';
+      statusBar.style.display = cfg.hasStatusBar && !isLandscape ? 'flex' : 'none';
+      homeIndicator.style.display = cfg.hasHomeBar ? 'flex' : 'none';
+      laptopBar.style.display = cfg.hasLaptopBar ? 'flex' : 'none';
+      laptopBase.style.display = cfg.hasLaptopBase ? 'flex' : 'none';
+
+      document.getElementById('viewportSpecs').innerText = `${cfg.name} (${isLandscape ? 'Landscape' : 'Portrait'}) • ${w} × ${h} px`;
+
+      // Auto scale immediately so device fits 100% on screen
+      autoScaleDevice();
+    }
+
+    function updateButtons(activeKey) {
+      document.querySelectorAll('.device-btn').forEach(btn => {
+        btn.classList.remove('bg-[#c5a059]', 'text-black', 'shadow');
+        btn.classList.add('text-stone-400');
+      });
+
+      const activeBtn = document.getElementById(`btn-${activeKey}`);
+      if (activeBtn) {
+        activeBtn.classList.add('bg-[#c5a059]', 'text-black', 'shadow');
+        activeBtn.classList.remove('text-stone-400');
+      }
+    }
+
+    function changeUrl(newUrl) {
+      document.getElementById('previewFrame').src = newUrl;
+    }
+
+    function refreshIframe() {
+      const frame = document.getElementById('previewFrame');
+      frame.src = frame.src;
+    }
+
+    // Realtime clock update for phone status bar
+    function updateClock() {
+      const now = new Date();
+      const h = now.getHours();
+      const m = String(now.getMinutes()).padStart(2, '0');
+      const clockEl = document.getElementById('clockDisplay');
+      if (clockEl) clockEl.innerText = `${h}:${m}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Listen to window resize to auto-fit device
+    window.addEventListener('resize', () => {
+      autoScaleDevice();
+    });
+
+    // Initial setup
+    applyConfig();
+  </script>
+</body>
+</html>

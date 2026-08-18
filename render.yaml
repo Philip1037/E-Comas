@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: maison-lumiere-boutique
+    env: node
+    buildCommand: npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 20.10.0
+      - key: NEXT_PUBLIC_SITE_URL
+        value: https://maison-lumiere-boutique.onrender.com
