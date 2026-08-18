@@ -2,6 +2,7 @@
 
 import { Product, Subscriber, Order, BoutiqueSettings, CartItem, Category } from './types';
 import { INITIAL_PRODUCTS, INITIAL_SUBSCRIBERS, INITIAL_ORDERS, DEFAULT_SETTINGS, INITIAL_CATEGORIES } from './data';
+import { supabase } from './supabase';
 
 const STORAGE_KEYS = {
   PRODUCTS: 'boutique_products_v4',
@@ -34,18 +35,116 @@ function setLocalItem<T>(key: string, value: T): void {
   }
 }
 
+// Global Supabase Sync Initializer (runs async in background on app load)
+export async function initializeDatabaseSync(): Promise<void> {
+  if (typeof window === 'undefined') return;
+
+  try {
+    // 1. Fetch & Sync Products
+    const { data: dbProducts } = await supabase.from('products').select('*').order('created_at', { ascending: false });
+    if (dbProducts && dbProducts.length > 0) {
+      const formattedProducts: Product[] = dbProducts.map((p) => ({
+        id: p.id,
+        title: p.title,
+        description: p.description || '',
+        price: Number(p.price),
+        category_id: p.category_id || 'all',
+        images: p.images || [],
+        stock_quantity: p.stock_quantity ?? 10,
+        is_new_arrival: p.is_new_arrival ?? true,
+        is_best_seller: p.is_best_seller ?? false,
+        is_active: p.is_active ?? true,
+        tags: p.tags || [],
+        created_at: p.created_at,
+      }));
+      setLocalItem(STORAGE_KEYS.PRODUCTS, formattedProducts);
+    } else {
+      // Seed initial products to Supabase if DB is empty
+      const currentProducts = getStoredProducts();
+      for (const prod of currentProducts) {
+        await supabase.from('products').upsert({
+          title: prod.title,
+          description: prod.description,
+          price: prod.price,
+          images: prod.images,
+          stock_quantity: prod.stock_quantity,
+          is_new_arrival: prod.is_new_arrival,
+          is_best_seller: prod.is_best_seller,
+          is_active: prod.is_active,
+          tags: prod.tags,
+        }, { onConflict: 'title' });
+      }
+    }
+
+    // 2. Fetch & Sync Settings
+    const { data: dbSettings } = await supabase.from('boutique_settings').select('*').eq('id', 1).single();
+    if (dbSettings) {
+      setLocalItem(STORAGE_KEYS.SETTINGS, {
+        brand_name: dbSettings.brand_name || DEFAULT_SETTINGS.brand_name,
+        tagline: dbSettings.tagline || DEFAULT_SETTINGS.tagline,
+        admin_whatsapp: dbSettings.admin_whatsapp || DEFAULT_SETTINGS.admin_whatsapp,
+        whatsapp_group_link: dbSettings.whatsapp_group_link || DEFAULT_SETTINGS.whatsapp_group_link,
+        orange_money_number: dbSettings.orange_money_number || DEFAULT_SETTINGS.orange_money_number,
+        orange_money_merchant_id: dbSettings.orange_money_merchant_id || DEFAULT_SETTINGS.orange_money_merchant_id,
+        orange_money_ussd_template: dbSettings.orange_money_ussd_template || DEFAULT_SETTINGS.orange_money_ussd_template,
+        afrimoney_number: dbSettings.afrimoney_number || DEFAULT_SETTINGS.afrimoney_number,
+        afrimoney_merchant_id: dbSettings.afrimoney_merchant_id || DEFAULT_SETTINGS.afrimoney_merchant_id,
+        afrimoney_ussd_template: dbSettings.afrimoney_ussd_template || DEFAULT_SETTINGS.afrimoney_ussd_template,
+        currency_code: dbSettings.currency_code || DEFAULT_SETTINGS.currency_code,
+        currency_symbol: dbSettings.currency_symbol || DEFAULT_SETTINGS.currency_symbol,
+        delivery_fee: Number(dbSettings.delivery_fee) || DEFAULT_SETTINGS.delivery_fee,
+        free_delivery_threshold: Number(dbSettings.free_delivery_threshold) || DEFAULT_SETTINGS.free_delivery_threshold,
+        contact_email: dbSettings.contact_email || DEFAULT_SETTINGS.contact_email,
+        store_address: dbSettings.store_address || DEFAULT_SETTINGS.store_address,
+        demo_mode_enabled: dbSettings.demo_mode_enabled ?? true,
+        admin_username: dbSettings.admin_username || DEFAULT_SETTINGS.admin_username,
+        admin_password: dbSettings.admin_password || DEFAULT_SETTINGS.admin_password,
+        admin_recovery_email: dbSettings.admin_recovery_email || DEFAULT_SETTINGS.admin_recovery_email,
+      });
+    }
+
+    // 3. Fetch & Sync Orders
+    const { data: dbOrders } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
+    if (dbOrders && dbOrders.length > 0) {
+      const formattedOrders: Order[] = dbOrders.map((o) => ({
+        id: o.id,
+        reference_code: o.reference_code,
+        customer_name: o.customer_name,
+        customer_phone: o.customer_phone,
+        delivery_address: o.delivery_address,
+        city: o.city,
+        items: o.items || [],
+        total_amount: Number(o.total_amount),
+        payment_method: o.payment_method,
+        status: o.status,
+        notes: o.notes || '',
+        created_at: o.created_at,
+      }));
+      setLocalItem(STORAGE_KEYS.ORDERS, formattedOrders);
+    }
+
+    // 4. Fetch & Sync Subscribers
+    const { data: dbSubscribers } = await supabase.from('subscribers').select('*').order('subscribed_at', { ascending: false });
+    if (dbSubscribers && dbSubscribers.length > 0) {
+      const formattedSubs: Subscriber[] = dbSubscribers.map((s) => ({
+        id: s.id,
+        full_name: s.full_name,
+        phone_number: s.phone_number,
+        email: s.email,
+        notes: s.notes || '',
+        subscribed_at: s.subscribed_at,
+      }));
+      setLocalItem(STORAGE_KEYS.SUBSCRIBERS, formattedSubs);
+    }
+  } catch (error) {
+    console.warn('Database sync warning:', error);
+  }
+}
+
 // Products
 export function getStoredProducts(): Product[] {
   const products = getLocalItem<Product[]>(STORAGE_KEYS.PRODUCTS, INITIAL_PRODUCTS);
-  // Auto-heal any stale or broken legacy image URLs
-  const healed = products.map((p) => {
-    const initialMatch = INITIAL_PRODUCTS.find((init) => init.id === p.id);
-    if (initialMatch && (!p.images || p.images.some((img) => img.includes('photo-1608248597359-577c223c683b') || img.includes('photo-1539109136881-3be0616acf4b')))) {
-      return { ...p, images: initialMatch.images };
-    }
-    return p;
-  });
-  return healed;
+  return products;
 }
 
 export function saveStoredProducts(products: Product[]): void {
@@ -61,6 +160,22 @@ export function addProduct(product: Omit<Product, 'id' | 'created_at'>): Product
   };
   const updated = [newProduct, ...products];
   saveStoredProducts(updated);
+
+  // Sync to Supabase
+  supabase.from('products').insert({
+    title: product.title,
+    description: product.description,
+    price: product.price,
+    images: product.images,
+    stock_quantity: product.stock_quantity,
+    is_new_arrival: product.is_new_arrival,
+    is_best_seller: product.is_best_seller,
+    is_active: product.is_active,
+    tags: product.tags,
+  }).then(({ error }) => {
+    if (error) console.error('Error inserting product into Supabase:', error);
+  });
+
   return newProduct;
 }
 
@@ -71,6 +186,22 @@ export function updateProduct(id: string, updates: Partial<Product>): Product | 
   const updatedProduct = { ...products[index], ...updates };
   products[index] = updatedProduct;
   saveStoredProducts(products);
+
+  // Sync to Supabase
+  supabase.from('products').update({
+    title: updatedProduct.title,
+    description: updatedProduct.description,
+    price: updatedProduct.price,
+    images: updatedProduct.images,
+    stock_quantity: updatedProduct.stock_quantity,
+    is_new_arrival: updatedProduct.is_new_arrival,
+    is_best_seller: updatedProduct.is_best_seller,
+    is_active: updatedProduct.is_active,
+    tags: updatedProduct.tags,
+  }).eq('id', id).then(({ error }) => {
+    if (error) console.error('Error updating product in Supabase:', error);
+  });
+
   return updatedProduct;
 }
 
@@ -78,6 +209,12 @@ export function deleteProduct(id: string): boolean {
   const products = getStoredProducts();
   const filtered = products.filter((p) => p.id !== id);
   saveStoredProducts(filtered);
+
+  // Sync to Supabase
+  supabase.from('products').delete().eq('id', id).then(({ error }) => {
+    if (error) console.error('Error deleting product from Supabase:', error);
+  });
+
   return true;
 }
 
@@ -138,6 +275,17 @@ export function addSubscriber(sub: Omit<Subscriber, 'id' | 'subscribed_at'>): { 
   };
   const updated = [newSub, ...subscribers];
   setLocalItem(STORAGE_KEYS.SUBSCRIBERS, updated);
+
+  // Sync to Supabase
+  supabase.from('subscribers').insert({
+    full_name: sub.full_name,
+    phone_number: sub.phone_number,
+    email: sub.email,
+    notes: sub.notes,
+  }).then(({ error }) => {
+    if (error) console.error('Error inserting subscriber into Supabase:', error);
+  });
+
   return { success: true, message: "Welcome to the Maison Lumière VIP Club!", subscriber: newSub };
 }
 
@@ -145,6 +293,10 @@ export function deleteSubscriber(id: string): void {
   const subscribers = getStoredSubscribers();
   const filtered = subscribers.filter((s) => s.id !== id);
   setLocalItem(STORAGE_KEYS.SUBSCRIBERS, filtered);
+
+  supabase.from('subscribers').delete().eq('id', id).then(({ error }) => {
+    if (error) console.error('Error deleting subscriber from Supabase:', error);
+  });
 }
 
 export function exportSubscribersToCSV(): void {
@@ -202,6 +354,22 @@ export function createOrderRecord(orderData: Omit<Order, 'id' | 'reference_code'
   });
   saveStoredProducts(products);
 
+  // Sync to Supabase
+  supabase.from('orders').insert({
+    reference_code: randomRef,
+    customer_name: orderData.customer_name,
+    customer_phone: orderData.customer_phone,
+    delivery_address: orderData.delivery_address,
+    city: orderData.city || 'Freetown',
+    items: orderData.items,
+    total_amount: orderData.total_amount,
+    payment_method: orderData.payment_method,
+    status: orderData.status,
+    notes: orderData.notes,
+  }).then(({ error }) => {
+    if (error) console.error('Error inserting order into Supabase:', error);
+  });
+
   return newOrder;
 }
 
@@ -211,6 +379,11 @@ export function updateOrderStatus(orderId: string, status: Order['status']): Ord
   if (!order) return null;
   order.status = status;
   setLocalItem(STORAGE_KEYS.ORDERS, orders);
+
+  supabase.from('orders').update({ status }).eq('id', orderId).then(({ error }) => {
+    if (error) console.error('Error updating order status in Supabase:', error);
+  });
+
   return order;
 }
 
@@ -230,6 +403,34 @@ export function getStoredSettings(): BoutiqueSettings {
 
 export function saveStoredSettings(settings: BoutiqueSettings): void {
   setLocalItem(STORAGE_KEYS.SETTINGS, settings);
+
+  // Sync to Supabase boutique_settings table
+  supabase.from('boutique_settings').upsert({
+    id: 1,
+    brand_name: settings.brand_name,
+    tagline: settings.tagline,
+    admin_whatsapp: settings.admin_whatsapp,
+    whatsapp_group_link: settings.whatsapp_group_link,
+    orange_money_number: settings.orange_money_number,
+    orange_money_merchant_id: settings.orange_money_merchant_id,
+    orange_money_ussd_template: settings.orange_money_ussd_template,
+    afrimoney_number: settings.afrimoney_number,
+    afrimoney_merchant_id: settings.afrimoney_merchant_id,
+    afrimoney_ussd_template: settings.afrimoney_ussd_template,
+    currency_code: settings.currency_code,
+    currency_symbol: settings.currency_symbol,
+    delivery_fee: settings.delivery_fee,
+    free_delivery_threshold: settings.free_delivery_threshold,
+    contact_email: settings.contact_email,
+    store_address: settings.store_address,
+    demo_mode_enabled: settings.demo_mode_enabled,
+    admin_username: settings.admin_username,
+    admin_password: settings.admin_password,
+    admin_recovery_email: settings.admin_recovery_email,
+    updated_at: new Date().toISOString(),
+  }).then(({ error }) => {
+    if (error) console.error('Error saving settings to Supabase:', error);
+  });
 }
 
 // Admin Auth State

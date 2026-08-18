@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import AdminSidebar from '@/components/admin/AdminSidebar';
-import { isUserAdminAuthenticated } from '@/lib/storage';
+import { isUserAdminAuthenticated, initializeDatabaseSync } from '@/lib/storage';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -11,11 +11,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [authorized, setAuthorized] = useState<boolean | null>(null);
 
   useEffect(() => {
+    initializeDatabaseSync();
+
     // If we're on the login page, don't enforce auth guard
     if (pathname === '/admin/login') {
       setAuthorized(true);
       return;
     }
+
 
     const isAuth = isUserAdminAuthenticated();
     if (!isAuth) {

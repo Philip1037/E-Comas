@@ -13,7 +13,8 @@ import PaymentInstructionModal from '@/components/PaymentInstructionModal';
 import VipSubscribeSection from '@/components/VipSubscribeSection';
 import MobileBottomBar from '@/components/MobileBottomBar';
 import Footer from '@/components/Footer';
-import { getStoredProducts, setAdminAuthenticated } from '@/lib/storage';
+import { getStoredProducts, setAdminAuthenticated, initializeDatabaseSync } from '@/lib/storage';
+
 import { Product, PaymentMethod } from '@/lib/types';
 import { Sparkles, Zap, Flame, ShieldCheck, ShoppingBag, ArrowRight } from 'lucide-react';
 import { useCart } from '@/lib/store';
@@ -45,6 +46,9 @@ export default function StorefrontPage() {
   useEffect(() => {
     setAdminAuthenticated(false);
     setProducts(getStoredProducts());
+    initializeDatabaseSync().then(() => {
+      setProducts(getStoredProducts());
+    });
   }, []);
 
   const handleOpenVip = () => {
