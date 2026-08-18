@@ -24,8 +24,8 @@ export default function AdminLoginPage() {
   const [activePin, setActivePin] = useState('');
 
   useEffect(() => {
-    setEmail('admin@boutique.sl');
-    setPassword('admin123');
+    setEmail('');
+    setPassword('');
     const settings = getStoredSettings();
     setRecoveryEmail(settings.admin_recovery_email || 'philipbangura1037@gmail.com');
   }, []);
@@ -41,10 +41,8 @@ export default function AdminLoginPage() {
     const validPassword = settings.admin_password || 'admin123';
 
     const enteredEmail = email.toLowerCase().trim();
-    const isUsernameMatch = enteredEmail === validUsername || enteredEmail === 'admin@boutique.sl';
-    const isPasswordMatch = password === validPassword || password === 'admin123';
 
-    if (isUsernameMatch && isPasswordMatch) {
+    if (enteredEmail === validUsername && password === validPassword) {
       setAdminAuthenticated(true);
       setTimeout(() => {
         router.push('/admin');
@@ -54,6 +52,7 @@ export default function AdminLoginPage() {
       setLoading(false);
     }
   };
+
 
 
   const handleRequestResetCode = async (e: React.FormEvent) => {
