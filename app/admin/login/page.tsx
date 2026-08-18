@@ -221,9 +221,9 @@ export default function AdminLoginPage() {
                   />
                 </div>
               </div>
-           </div>
 
               <button
+
                 type="submit"
                 disabled={loading}
                 className="w-full py-3.5 px-6 rounded-xl bg-[#c5a059] hover:bg-[#ecd09f] text-stone-950 font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-xl shadow-[#c5a059]/20 active:scale-98 cursor-pointer mt-2"
