@@ -25,10 +25,9 @@ export default function AdminLoginPage() {
 
   useEffect(() => {
     const settings = getStoredSettings();
-    setEmail(settings.admin_username || 'admin@boutique.sl');
-    setPassword(settings.admin_password || 'admin123');
     setRecoveryEmail(settings.admin_recovery_email || 'philipbangura1037@gmail.com');
   }, []);
+
 
 
   const handleLogin = (e: React.FormEvent) => {
