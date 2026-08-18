@@ -3,7 +3,9 @@
 import React from 'react';
 import Link from 'next/link';
 import { useCart } from '@/lib/store';
+import { setAdminAuthenticated } from '@/lib/storage';
 import { Sparkles, Phone, Mail, MapPin, ShieldCheck, Heart, ArrowUp } from 'lucide-react';
+
 
 export default function Footer({ onOpenVip }: { onOpenVip?: () => void }) {
   const { settings } = useCart();
@@ -131,11 +133,16 @@ export default function Footer({ onOpenVip }: { onOpenVip?: () => void }) {
 
 
           <div className="flex items-center gap-6">
-            <Link href="/admin/login" className="hover:text-stone-300 transition-colors flex items-center gap-1">
+            <Link
+              href="/admin/login"
+              onClick={() => setAdminAuthenticated(false)}
+              className="hover:text-stone-300 transition-colors flex items-center gap-1 cursor-pointer"
+            >
               <ShieldCheck className="w-3.5 h-3.5" />
               <span>Admin Management</span>
             </Link>
             <button
+
               onClick={scrollToTop}
               className="flex items-center gap-1 hover:text-white transition-colors cursor-pointer"
             >

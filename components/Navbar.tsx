@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useCart } from '@/lib/store';
-import { getStoredCategories } from '@/lib/storage';
+import { getStoredCategories, setAdminAuthenticated } from '@/lib/storage';
 import { Category } from '@/lib/types';
 import {
   ShoppingBag,
@@ -157,14 +157,16 @@ export default function Navbar({ onOpenVip, onSearchSubmit, onCategorySelect }: 
 
               {/* Admin Portal Link */}
               <Link
-                href="/admin"
-                className="p-2 text-stone-500 hover:text-stone-900 rounded-full hover:bg-stone-100 transition-colors"
+                href="/admin/login"
+                onClick={() => setAdminAuthenticated(false)}
+                className="p-2 text-stone-500 hover:text-stone-900 rounded-full hover:bg-stone-100 transition-colors cursor-pointer"
                 title="Admin Portal"
               >
                 <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5" />
               </Link>
 
               {/* Shopping Bag Button */}
+
               <button
                 onClick={() => setIsCartOpen(true)}
                 className="relative flex items-center justify-center p-2 sm:p-2.5 rounded-full bg-[#18161b] text-white hover:bg-[#c5a059] transition-all shadow-md active:scale-95 cursor-pointer ml-1"
@@ -350,13 +352,17 @@ export default function Navbar({ onOpenVip, onSearchSubmit, onCategorySelect }: 
             <div className="p-4 bg-stone-50 border-t border-stone-200 flex items-center justify-between text-xs text-stone-600">
               <span>Currency: <strong>SLE (Leone)</strong></span>
               <Link
-                href="/admin"
-                onClick={() => setIsDrawerOpen(false)}
-                className="font-bold text-stone-900 hover:text-[#c5a059] flex items-center gap-1"
+                href="/admin/login"
+                onClick={() => {
+                  setAdminAuthenticated(false);
+                  setIsDrawerOpen(false);
+                }}
+                className="font-bold text-stone-900 hover:text-[#c5a059] flex items-center gap-1 cursor-pointer"
               >
                 <ShieldCheck className="w-4 h-4" />
                 <span>Admin</span>
               </Link>
+
             </div>
           </div>
         </div>
