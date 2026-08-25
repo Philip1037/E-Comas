@@ -69,10 +69,41 @@ export default function AiShoppingAssistant() {
   };
 
   const processUserQuery = (query: string): Message => {
-    const q = query.toLowerCase();
+    const q = query.toLowerCase().trim();
     const allProducts = getStoredProducts().filter((p) => p.is_active);
 
-    // 1. Cart Inquiry or Checkout
+    // 1. Greetings & Small Talk
+    const isGreeting = /^(hi|hello|hey|yo|greetings|good\s*(morning|afternoon|evening)|bonjour|hi\s*there|hello\s*there)\b/i.test(q);
+    if (isGreeting || q === 'hi' || q === 'hello' || q === 'hey') {
+      return {
+        id: `asst-${Date.now()}`,
+        sender: 'assistant',
+        text: "Hello! Welcome to **Maison Lumière**. 💎✨\n\nI am your personal AI shopping concierge. How can I assist your style today? You can ask me to show you **Dresses**, **18K Gold Jewelry**, **Perfumes**, **Skincare**, check your bag, or ask about express delivery in Freetown!",
+        timestamp: new Date(),
+      };
+    }
+
+    // 2. Identity & Capability FAQs
+    if (q.includes('who are you') || q.includes('what can you do') || q.includes('help') || q.includes('how to use') || q.includes('what is this')) {
+      return {
+        id: `asst-${Date.now()}`,
+        sender: 'assistant',
+        text: "I am **Lumière AI**, your personal shopping assistant! 🛍️✨\n\nHere is what I can do for you:\n• Find luxury dresses, 18K gold jewelry, perfumes, & skincare\n• Recommend top bestsellers and flash sale deals\n• Add items directly to your shopping bag\n• Summarize your cart total and help with Freetown delivery & payment info",
+        timestamp: new Date(),
+      };
+    }
+
+    // 3. Thanks & Appreciation
+    if (q.includes('thank') || q.includes('thanks') || q.includes('awesome') || q.includes('great') || q.includes('perfect')) {
+      return {
+        id: `asst-${Date.now()}`,
+        sender: 'assistant',
+        text: "You are most welcome! 💎✨ Let me know whenever you need more style recommendations or help with your order.",
+        timestamp: new Date(),
+      };
+    }
+
+    // 4. Cart Inquiry or Checkout
     if (q.includes('cart') || q.includes('bag') || q.includes('basket') || q.includes('checkout') || q.includes('total')) {
       if (cart.length === 0) {
         return {
@@ -96,7 +127,7 @@ export default function AiShoppingAssistant() {
       };
     }
 
-    // 2. Delivery / Payment FAQs
+    // 5. Delivery / Payment FAQs
     if (q.includes('deliver') || q.includes('freetown') || q.includes('ship') || q.includes('payment') || q.includes('orange') || q.includes('afri') || q.includes('whatsapp')) {
       return {
         id: `asst-${Date.now()}`,
@@ -106,7 +137,7 @@ export default function AiShoppingAssistant() {
       };
     }
 
-    // 3. Category Search matching
+    // 6. Category Search matching
     let matchedProducts: Product[] = [];
     let responseIntro = '';
 
@@ -141,15 +172,21 @@ export default function AiShoppingAssistant() {
       matchedProducts = allProducts.filter((p) => p.is_new_arrival);
       responseIntro = "✨ Here are the **Latest New Arrivals** fresh from the runway:";
     } else {
-      // Keyword fallback match
-      matchedProducts = allProducts.filter(
-        (p) =>
-          p.title.toLowerCase().includes(q) ||
-          p.description.toLowerCase().includes(q) ||
-          (p.tags && p.tags.some((t) => t.toLowerCase().includes(q)))
-      );
-      if (matchedProducts.length > 0) {
-        responseIntro = `I found **${matchedProducts.length}** item${matchedProducts.length > 1 ? 's' : ''} matching your search:`;
+      // Strict Keyword Search: Ignore short 1-2 char filler terms
+      const searchTerms = q
+        .split(/\s+/)
+        .filter((term) => term.length >= 3 && !['the', 'and', 'for', 'you', 'can', 'has', 'how', 'who', 'what', 'see', 'get'].includes(term));
+
+      if (searchTerms.length > 0) {
+        matchedProducts = allProducts.filter((p) => {
+          const title = p.title.toLowerCase();
+          const desc = p.description.toLowerCase();
+          const tags = p.tags ? p.tags.join(' ').toLowerCase() : '';
+          return searchTerms.some((term) => title.includes(term) || desc.includes(term) || tags.includes(term));
+        });
+        if (matchedProducts.length > 0) {
+          responseIntro = `I found **${matchedProducts.length}** item${matchedProducts.length > 1 ? 's' : ''} matching your search:`;
+        }
       }
     }
 
@@ -168,7 +205,6 @@ export default function AiShoppingAssistant() {
       id: `asst-${Date.now()}`,
       sender: 'assistant',
       text: `I couldn't find exact matches for "${query}". Try asking for **"Dresses"**, **"18K Gold Jewelry"**, **"Perfumes"**, **"Skincare"**, or click one of the quick prompts below! ✨`,
-      products: allProducts.filter((p) => p.is_best_seller).slice(0, 3),
       timestamp: new Date(),
     };
   };
