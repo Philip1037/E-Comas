@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { getStoredSettings, saveStoredSettings, saveStoredProducts, saveStoredSubscribers, saveStoredOrders } from '@/lib/storage';
+import { getStoredSettings, saveStoredSettings, saveStoredProducts, saveStoredSubscribers, saveStoredOrders, clearDeletedProducts } from '@/lib/storage';
 import { INITIAL_PRODUCTS, INITIAL_SUBSCRIBERS, INITIAL_ORDERS, DEFAULT_SETTINGS } from '@/lib/data';
 import { BoutiqueSettings } from '@/lib/types';
 import { Settings, Save, Check, RotateCcw, ShieldCheck, Phone, DollarSign, Truck, MapPin, Mail } from 'lucide-react';
@@ -40,6 +40,7 @@ export default function AdminSettingsPage() {
 
   const handleResetDefaults = () => {
     if (confirm('Reset sample products, subscribers, and settings back to factory demo defaults?')) {
+      clearDeletedProducts();
       saveStoredProducts(INITIAL_PRODUCTS);
       saveStoredSubscribers(INITIAL_SUBSCRIBERS);
       saveStoredOrders(INITIAL_ORDERS);

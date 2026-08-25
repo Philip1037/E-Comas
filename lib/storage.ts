@@ -12,6 +12,7 @@ const STORAGE_KEYS = {
   CATEGORIES: 'boutique_categories_v5',
   CART: 'boutique_cart_v1',
   ADMIN_AUTH: 'boutique_admin_auth_v1',
+  DELETED_PRODUCTS: 'boutique_deleted_products_v1',
 };
 
 // Safe LocalStorage helpers
@@ -35,43 +36,87 @@ function setLocalItem<T>(key: string, value: T): void {
   }
 }
 
+// Deleted Products helpers
+export function getDeletedProductIds(): string[] {
+  return getLocalItem<string[]>(STORAGE_KEYS.DELETED_PRODUCTS, []);
+}
+
+export function markProductDeleted(id: string): void {
+  const deleted = getDeletedProductIds();
+  if (!deleted.includes(id)) {
+    setLocalItem(STORAGE_KEYS.DELETED_PRODUCTS, [...deleted, id]);
+  }
+}
+
+export function clearDeletedProducts(): void {
+  setLocalItem(STORAGE_KEYS.DELETED_PRODUCTS, []);
+}
+
 // Global Supabase Sync Initializer (runs async in background on app load)
 export async function initializeDatabaseSync(): Promise<void> {
   if (typeof window === 'undefined') return;
 
   try {
+    const deletedIds = new Set(getDeletedProductIds());
+
     // 1. Fetch & Sync Products
     const { data: dbProducts } = await supabase.from('products').select('*').order('created_at', { ascending: false });
-    if (dbProducts && dbProducts.length > 0) {
-      // Deduplicate DB products by title
-      const seenTitles = new Set<string>();
-      const formattedProducts: Product[] = [];
+    
+    // Read local products currently stored in localStorage
+    const localProducts = getLocalItem<Product[]>(STORAGE_KEYS.PRODUCTS, []);
 
+    const seenTitles = new Set<string>();
+    const seenIds = new Set<string>();
+    const mergedProducts: Product[] = [];
+
+    const addIfValid = (p: Product) => {
+      const titleKey = (p.title || '').trim().toLowerCase();
+      if (!titleKey) return;
+      if (p.id && deletedIds.has(p.id)) return;
+      if (seenTitles.has(titleKey) || (p.id && seenIds.has(p.id))) return;
+      seenTitles.add(titleKey);
+      if (p.id) seenIds.add(p.id);
+      mergedProducts.push(p);
+    };
+
+    // First priority: DB products
+    if (dbProducts && dbProducts.length > 0) {
       for (const p of dbProducts) {
-        const titleKey = (p.title || '').trim().toLowerCase();
-        if (!seenTitles.has(titleKey)) {
-          seenTitles.add(titleKey);
-          formattedProducts.push({
-            id: p.id,
-            title: p.title,
-            description: p.description || '',
-            price: Number(p.price),
-            category_id: p.category_id || 'all',
-            images: p.images || [],
-            stock_quantity: p.stock_quantity ?? 10,
-            is_new_arrival: p.is_new_arrival ?? true,
-            is_best_seller: p.is_best_seller ?? false,
-            is_active: p.is_active ?? true,
-            tags: p.tags || [],
-            created_at: p.created_at,
-          });
-        }
+        addIfValid({
+          id: p.id,
+          title: p.title,
+          description: p.description || '',
+          price: Number(p.price),
+          category_id: p.category_id || 'all',
+          images: p.images || [],
+          stock_quantity: p.stock_quantity ?? 10,
+          is_new_arrival: p.is_new_arrival ?? true,
+          is_best_seller: p.is_best_seller ?? false,
+          is_active: p.is_active ?? true,
+          tags: p.tags || [],
+          created_at: p.created_at,
+        });
       }
-      setLocalItem(STORAGE_KEYS.PRODUCTS, formattedProducts);
-    } else {
-      // Seed initial products to Supabase if DB is empty
-      const currentProducts = getStoredProducts();
-      for (const prod of currentProducts) {
+    }
+
+    // Second priority: existing products in localStorage
+    for (const p of localProducts) {
+      addIfValid(p);
+    }
+
+    // Third priority: fallback INITIAL_PRODUCTS
+    for (const p of INITIAL_PRODUCTS) {
+      addIfValid(p);
+    }
+
+    // Save complete merged products to localStorage
+    setLocalItem(STORAGE_KEYS.PRODUCTS, mergedProducts);
+
+    // Seed/upsert missing items into Supabase
+    const dbTitles = new Set((dbProducts || []).map((p) => (p.title || '').trim().toLowerCase()));
+    for (const prod of mergedProducts) {
+      const titleKey = (prod.title || '').trim().toLowerCase();
+      if (!dbTitles.has(titleKey)) {
         await supabase.from('products').upsert({
           title: prod.title,
           description: prod.description,
@@ -154,6 +199,9 @@ export async function initializeDatabaseSync(): Promise<void> {
 // Products
 export function getStoredProducts(): Product[] {
   const products = getLocalItem<Product[]>(STORAGE_KEYS.PRODUCTS, INITIAL_PRODUCTS);
+  if (!products || products.length === 0) {
+    return INITIAL_PRODUCTS;
+  }
   return products;
 }
 
@@ -172,7 +220,7 @@ export function addProduct(product: Omit<Product, 'id' | 'created_at'>): Product
   saveStoredProducts(updated);
 
   // Sync to Supabase
-  supabase.from('products').insert({
+  supabase.from('products').upsert({
     title: product.title,
     description: product.description,
     price: product.price,
@@ -182,7 +230,7 @@ export function addProduct(product: Omit<Product, 'id' | 'created_at'>): Product
     is_best_seller: product.is_best_seller,
     is_active: product.is_active,
     tags: product.tags,
-  }).then(({ error }) => {
+  }, { onConflict: 'title' }).then(({ error }) => {
     if (error) console.error('Error inserting product into Supabase:', error);
   });
 
@@ -198,7 +246,7 @@ export function updateProduct(id: string, updates: Partial<Product>): Product | 
   saveStoredProducts(products);
 
   // Sync to Supabase
-  supabase.from('products').update({
+  supabase.from('products').upsert({
     title: updatedProduct.title,
     description: updatedProduct.description,
     price: updatedProduct.price,
@@ -208,7 +256,7 @@ export function updateProduct(id: string, updates: Partial<Product>): Product | 
     is_best_seller: updatedProduct.is_best_seller,
     is_active: updatedProduct.is_active,
     tags: updatedProduct.tags,
-  }).eq('id', id).then(({ error }) => {
+  }, { onConflict: 'title' }).then(({ error }) => {
     if (error) console.error('Error updating product in Supabase:', error);
   });
 
@@ -217,10 +265,17 @@ export function updateProduct(id: string, updates: Partial<Product>): Product | 
 
 export function deleteProduct(id: string): boolean {
   const products = getStoredProducts();
+  const targetProduct = products.find((p) => p.id === id);
+  markProductDeleted(id);
   const filtered = products.filter((p) => p.id !== id);
   saveStoredProducts(filtered);
 
   // Sync to Supabase
+  if (targetProduct) {
+    supabase.from('products').delete().eq('title', targetProduct.title).then(({ error }) => {
+      if (error) console.error('Error deleting product by title from Supabase:', error);
+    });
+  }
   supabase.from('products').delete().eq('id', id).then(({ error }) => {
     if (error) console.error('Error deleting product from Supabase:', error);
   });
