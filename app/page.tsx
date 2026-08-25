@@ -13,6 +13,7 @@ import PaymentInstructionModal from '@/components/PaymentInstructionModal';
 import VipSubscribeSection from '@/components/VipSubscribeSection';
 import MobileBottomBar from '@/components/MobileBottomBar';
 import Footer from '@/components/Footer';
+import AiShoppingAssistant from '@/components/AiShoppingAssistant';
 import { getStoredProducts, setAdminAuthenticated, initializeDatabaseSync } from '@/lib/storage';
 
 import { Product, PaymentMethod } from '@/lib/types';
@@ -240,6 +241,9 @@ export default function StorefrontPage() {
         settings={settings}
         whatsAppUrl={paymentModalData.whatsAppUrl}
       />
+
+      {/* AI Personal Shopping Assistant */}
+      <AiShoppingAssistant />
     </div>
   );
 }
