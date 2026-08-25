@@ -215,10 +215,10 @@ export default function VipSubscribeSection() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-[#dfba73] to-[#c5a059] hover:from-[#ecd09f] hover:to-[#dfba73] text-stone-950 font-bold text-sm tracking-wide flex items-center justify-center gap-2 shadow-lg hover:shadow-[#c5a059]/25 transition-all duration-300 active:scale-98 disabled:opacity-50 cursor-pointer"
+                    className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-[#dfba73] via-[#c5a059] to-[#b08b46] hover:from-[#ecd09f] hover:to-[#dfba73] text-stone-950 font-bold text-sm tracking-wide flex items-center justify-center gap-2 shadow-xl hover:shadow-[#c5a059]/35 transition-all duration-300 active:scale-98 disabled:opacity-50 cursor-pointer btn-pop btn-shimmer pulse-ring-gold"
                   >
-                    <Sparkles className="w-4 h-4" />
-                    <span>{loading ? 'Registering VIP...' : 'Get VIP Drop Notifications'}</span>
+                    <Sparkles className="w-4 h-4 animate-spin-slow text-stone-950" />
+                    <span>{loading ? 'Registering VIP Pass...' : 'Get VIP Drop Notifications'}</span>
                     <ArrowRight className="w-4 h-4" />
                   </button>
 

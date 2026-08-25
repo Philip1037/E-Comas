@@ -122,7 +122,7 @@
     transform: translateY(0px);
   }
   50% {
-    transform: translateY(-7px);
+    transform: translateY(-8px);
   }
 }
 
@@ -131,7 +131,7 @@
     transform: translateY(0px) rotate(0deg);
   }
   50% {
-    transform: translateY(-10px) rotate(1.5deg);
+    transform: translateY(-12px) rotate(2deg);
   }
 }
 
@@ -143,20 +143,36 @@
   animation: floatSlow 6s ease-in-out infinite;
 }
 
-/* 3. Pulsing Ambient Glow */
+/* 3. Pulsing Ambient Glow & Light Ring */
 @keyframes pulseGlow {
   0%, 100% {
-    opacity: 0.6;
+    opacity: 0.55;
     transform: scale(1);
   }
   50% {
     opacity: 0.9;
-    transform: scale(1.06);
+    transform: scale(1.08);
   }
 }
 
 .animate-pulse-glow {
   animation: pulseGlow 4s ease-in-out infinite;
+}
+
+@keyframes pulseRing {
+  0% {
+    box-shadow: 0 0 0 0 rgba(197, 160, 89, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(197, 160, 89, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(197, 160, 89, 0);
+  }
+}
+
+.pulse-ring-gold {
+  animation: pulseRing 2.5s infinite;
 }
 
 /* 4. Subtle Category Ring Rotation */
@@ -179,8 +195,8 @@
 }
 
 .product-card-hover:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(197, 160, 89, 0.35);
+  transform: translateY(-6px);
+  box-shadow: 0 20px 36px -10px rgba(0, 0, 0, 0.14), 0 0 0 1px rgba(197, 160, 89, 0.45);
 }
 
 /* 6. Smooth Image Zoom */
@@ -189,14 +205,59 @@
 }
 
 .image-zoom:hover {
-  transform: scale(1.06);
+  transform: scale(1.08);
 }
 
-/* 7. Button Click Pop */
+/* 7. Button Click Pop & Shimmer Light Ray Sweep */
 .btn-pop {
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.18s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.18s ease;
 }
 
 .btn-pop:active {
-  transform: scale(0.95);
+  transform: scale(0.94);
+}
+
+/* Luxury Light Ray Sweep Effect for CTAs */
+.btn-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-shimmer::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    60deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.35) 50%,
+    transparent 70%
+  );
+  transform: rotate(30deg) translateX(-100%);
+  transition: transform 0.8s ease;
+}
+
+.btn-shimmer:hover::after {
+  transform: rotate(30deg) translateX(100%);
+}
+
+/* Glassmorphism ambient glow overlay */
+.luxury-glow-card {
+  position: relative;
+}
+
+.luxury-glow-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(197, 160, 89, 0.5), rgba(212, 122, 130, 0.3), rgba(255, 255, 255, 0.1));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
 }

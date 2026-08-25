@@ -139,19 +139,19 @@ export default function Navbar({ onOpenVip, onSearchSubmit, onCategorySelect }: 
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hidden sm:flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-full border border-emerald-200 transition-colors"
+                className="hidden sm:flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-full border border-emerald-200 transition-all duration-200 btn-pop hover:scale-105"
                 title="WhatsApp Direct"
               >
-                <Phone className="w-3 h-3 text-emerald-600" />
+                <Phone className="w-3 h-3 text-emerald-600 animate-pulse" />
                 <span>WhatsApp</span>
               </a>
 
               {/* VIP Club Link */}
               <button
                 onClick={onOpenVip}
-                className="hidden lg:flex items-center gap-1 text-xs font-bold text-rose-700 hover:text-rose-800 bg-rose-50 px-3 py-1.5 rounded-full border border-rose-200 transition-colors cursor-pointer"
+                className="hidden lg:flex items-center gap-1 text-xs font-bold text-rose-700 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-full border border-rose-200 transition-all duration-200 cursor-pointer btn-pop hover:scale-105"
               >
-                <Sparkles className="w-3.5 h-3.5 text-[#c5a059]" />
+                <Sparkles className="w-3.5 h-3.5 text-[#c5a059] animate-spin-slow" />
                 <span>VIP Club</span>
               </button>
 
@@ -159,17 +159,16 @@ export default function Navbar({ onOpenVip, onSearchSubmit, onCategorySelect }: 
               <Link
                 href="/admin/login"
                 onClick={() => setAdminAuthenticated(false)}
-                className="p-2 text-stone-500 hover:text-stone-900 rounded-full hover:bg-stone-100 transition-colors cursor-pointer"
+                className="p-2 text-stone-500 hover:text-stone-900 rounded-full hover:bg-stone-100 transition-all duration-200 cursor-pointer hover:scale-110 active:scale-90"
                 title="Admin Portal"
               >
-                <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5" />
+                <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-[#c5a059]" />
               </Link>
 
               {/* Shopping Bag Button */}
-
               <button
                 onClick={() => setIsCartOpen(true)}
-                className="relative flex items-center justify-center p-2 sm:p-2.5 rounded-full bg-[#18161b] text-white hover:bg-[#c5a059] transition-all shadow-md active:scale-95 cursor-pointer ml-1"
+                className="relative flex items-center justify-center p-2 sm:p-2.5 rounded-full bg-[#18161b] text-white hover:bg-[#c5a059] hover:text-stone-950 transition-all duration-300 shadow-md active:scale-90 hover:scale-110 cursor-pointer ml-1 btn-pop"
                 aria-label="View Shopping Bag"
               >
                 <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5" />

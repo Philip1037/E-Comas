@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Product } from '@/lib/types';
 import { useCart } from '@/lib/store';
-import { X, Plus, Minus, ShoppingBag, Sparkles, ShieldCheck, Truck, ArrowRight } from 'lucide-react';
+import { X, Plus, Minus, ShoppingBag, Sparkles, ShieldCheck, Truck, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface ProductModalProps {
   product: Product | null;
@@ -15,6 +15,7 @@ export default function ProductModal({ product, onClose, onOpenVip }: ProductMod
   const { addToCart } = useCart();
   const [selectedImg, setSelectedImg] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
   if (!product) return null;
 
@@ -42,6 +43,35 @@ export default function ProductModal({ product, onClose, onOpenVip }: ProductMod
     onClose();
   };
 
+  const handlePrevImage = () => {
+    setSelectedImg((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  const handleNextImage = () => {
+    setSelectedImg((prev) => (prev + 1) % images.length);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartX(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX === null || images.length <= 1) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchStartX - touchEndX;
+
+    if (Math.abs(diff) > 40) {
+      if (diff > 0) {
+        // Swipe left -> next image
+        setSelectedImg((prev) => (prev + 1) % images.length);
+      } else {
+        // Swipe right -> prev image
+        setSelectedImg((prev) => (prev - 1 + images.length) % images.length);
+      }
+    }
+    setTouchStartX(null);
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-200">
       <div
@@ -51,7 +81,7 @@ export default function ProductModal({ product, onClose, onOpenVip }: ProductMod
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-20 p-2 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 transition-colors shadow-sm"
+          className="absolute top-4 right-4 z-20 p-2 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 transition-colors shadow-sm cursor-pointer"
           aria-label="Close modal"
         >
           <X className="w-5 h-5" />
@@ -59,17 +89,49 @@ export default function ProductModal({ product, onClose, onOpenVip }: ProductMod
 
         {/* Left: Gallery Column */}
         <div className="md:w-1/2 bg-stone-100 p-6 flex flex-col justify-between">
-          <div className="aspect-[3/4] rounded-2xl overflow-hidden shadow-md bg-stone-200 relative">
+          <div
+            className="aspect-[3/4] rounded-2xl overflow-hidden shadow-md bg-stone-200 relative select-none group"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
             <img
               src={images[selectedImg] || images[0]}
-              alt={product.title}
+              alt={`${product.title} view ${selectedImg + 1}`}
               onError={(e) => {
                 e.currentTarget.src = 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=800&q=80';
               }}
-              className="w-full h-full object-cover object-center"
+              className="w-full h-full object-cover object-center transition-all duration-300"
             />
+
+            {/* Image Swap Arrows */}
+            {images.length > 1 && (
+              <>
+                <button
+                  onClick={handlePrevImage}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-white/90 hover:bg-white text-stone-900 shadow-md backdrop-blur-xs transition-transform active:scale-90 cursor-pointer"
+                  aria-label="Previous photo"
+                  title="Previous photo"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={handleNextImage}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-white/90 hover:bg-white text-stone-900 shadow-md backdrop-blur-xs transition-transform active:scale-90 cursor-pointer"
+                  aria-label="Next photo"
+                  title="Next photo"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+
+                {/* Counter Badge */}
+                <span className="absolute bottom-3 right-3 px-2.5 py-1 rounded-full bg-black/65 text-white text-[11px] font-bold tracking-wider z-20 backdrop-blur-xs">
+                  {selectedImg + 1} / {images.length}
+                </span>
+              </>
+            )}
+
             {product.is_new_arrival && (
-              <span className="absolute top-3 left-3 px-3 py-1 rounded-full bg-[#18161b] text-[#f5ebd7] text-xs font-bold uppercase tracking-wider shadow-md">
+              <span className="absolute top-3 left-3 px-3 py-1 rounded-full bg-[#18161b] text-[#f5ebd7] text-xs font-bold uppercase tracking-wider shadow-md z-10">
                 New Arrival
               </span>
             )}
@@ -83,7 +145,7 @@ export default function ProductModal({ product, onClose, onOpenVip }: ProductMod
                   key={idx}
                   onClick={() => setSelectedImg(idx)}
                   className={`relative w-16 h-16 rounded-xl overflow-hidden border-2 transition-all shrink-0 cursor-pointer ${
-                    selectedImg === idx ? 'border-[#c5a059] scale-105 shadow-md' : 'border-transparent opacity-70 hover:opacity-100'
+                    selectedImg === idx ? 'border-[#c5a059] scale-105 shadow-md ring-2 ring-[#c5a059]/40' : 'border-transparent opacity-70 hover:opacity-100'
                   }`}
                 >
                   <img

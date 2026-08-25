@@ -50,7 +50,7 @@ export default function CategoryFilter({
         </div>
 
         {/* Scrollable Story Avatars */}
-        <div className="flex items-center gap-3.5 sm:gap-5 overflow-x-auto pb-2 pt-1 scrollbar-none scroll-smooth">
+        <div className="flex items-center gap-3.5 sm:gap-5 overflow-x-auto px-3.5 sm:px-4 py-3 -mx-3.5 sm:-mx-4 scrollbar-none scroll-smooth">
           {/* ALL CATEGORIES BUBBLE */}
           <button
             onClick={() => onSelectCategory('all')}
@@ -63,9 +63,8 @@ export default function CategoryFilter({
                   : 'bg-stone-200 group-hover:bg-[#c5a059] group-hover:scale-105'
               }`}
             >
-              <div className="w-full h-full rounded-full bg-[#18161b] text-white flex flex-col items-center justify-center p-1 border-2 border-white shadow-inner">
-                <Grid className={`w-4 h-4 sm:w-5 sm:h-5 ${activeCategory === 'all' ? 'text-[#c5a059]' : 'text-stone-300'}`} />
-                <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-wider mt-0.5">All</span>
+              <div className="w-full h-full rounded-full bg-[#18161b] text-white flex items-center justify-center border-2 border-white shadow-inner">
+                <Grid className={`w-5 h-5 sm:w-6 sm:h-6 ${activeCategory === 'all' ? 'text-[#c5a059]' : 'text-stone-300'}`} />
               </div>
             </div>
             <span

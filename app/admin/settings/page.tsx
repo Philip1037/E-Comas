@@ -28,14 +28,15 @@ export default function AdminSettingsPage() {
     setSettings((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    saveStoredSettings(settings);
+    await saveStoredSettings(settings);
     refreshSettings();
     setIsSaved(true);
     showToast('Settings Saved', 'Boutique configuration and payment options updated.', 'success');
     setTimeout(() => setIsSaved(false), 3000);
   };
+
 
   const handleResetDefaults = () => {
     if (confirm('Reset sample products, subscribers, and settings back to factory demo defaults?')) {

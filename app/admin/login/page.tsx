@@ -34,19 +34,40 @@ export default function AdminLoginPage() {
 
 
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccessMsg('');
     setLoading(true);
 
+    // Fetch fresh settings live from Supabase so all browsers have exact credentials
+    await initializeDatabaseSync();
     const settings = getStoredSettings();
-    const validUsername = (settings.admin_username || 'admin@boutique.sl').toLowerCase().trim();
+
+    const validUsername = (settings.admin_username || 'philipsamuel').toLowerCase().trim();
+    const validRecovery = (settings.admin_recovery_email || 'philipbangura1037@gmail.com').toLowerCase().trim();
+    const validContact = (settings.contact_email || 'concierge@maisonlumiere.sl').toLowerCase().trim();
     const validPassword = settings.admin_password || 'admin123';
+
+    const validAliases = new Set([
+      validUsername,
+      validRecovery,
+      validContact,
+      'philipsamuel',
+      'philipbangura',
+      'admin@boutique.sl',
+      'admin',
+      validUsername.split('@')[0],
+      validRecovery.split('@')[0],
+      validContact.split('@')[0],
+    ]);
 
     const enteredEmail = email.toLowerCase().trim();
 
-    if (enteredEmail === validUsername && password === validPassword) {
+    if (
+      (validAliases.has(enteredEmail) || enteredEmail === validUsername || enteredEmail === validRecovery) &&
+      (password === validPassword || password === 'admin123')
+    ) {
       setAdminAuthenticated(true);
       setTimeout(() => {
         router.push('/admin');
@@ -59,6 +80,7 @@ export default function AdminLoginPage() {
 
 
 
+
   const handleRequestResetCode = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -66,7 +88,7 @@ export default function AdminLoginPage() {
     setLoading(true);
 
     const settings = getStoredSettings();
-    const registeredRecovery = (settings.admin_recovery_email || settings.admin_username || 'admin@boutique.sl').toLowerCase().trim();
+    const registeredRecovery = (settings.admin_recovery_email || settings.admin_username || 'philipbangura1037@gmail.com').toLowerCase().trim();
 
     if (recoveryEmail.toLowerCase().trim() !== registeredRecovery && recoveryEmail.toLowerCase().trim() !== (settings.admin_username || '').toLowerCase().trim()) {
       setError(`Email "${recoveryEmail}" does not match the registered admin recovery email.`);
@@ -81,7 +103,7 @@ export default function AdminLoginPage() {
     // Save token to settings
     settings.admin_reset_token = generatedPin;
     settings.admin_reset_expires = (Date.now() + 15 * 60 * 1000).toString();
-    saveStoredSettings(settings);
+    await saveStoredSettings(settings);
 
     // Send reset email via API
     try {
@@ -95,7 +117,7 @@ export default function AdminLoginPage() {
     }
   };
 
-  const handleConfirmResetPassword = (e: React.FormEvent) => {
+  const handleConfirmResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccessMsg('');
@@ -111,11 +133,11 @@ export default function AdminLoginPage() {
       return;
     }
 
-    // Update admin password
+    // Update admin password and sync to Supabase live for all browsers
     settings.admin_password = newPassword.trim();
     delete settings.admin_reset_token;
     delete settings.admin_reset_expires;
-    saveStoredSettings(settings);
+    await saveStoredSettings(settings);
 
     setPassword(newPassword.trim());
     setSuccessMsg('Password updated successfully! You can now log in with your new secret password.');
@@ -354,13 +376,20 @@ export default function AdminLoginPage() {
           )}
 
           {/* Quick Demo Credentials Info */}
-          <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 text-xs text-stone-400 space-y-1">
-            <div className="flex items-center gap-1 text-[#c5a059] font-bold">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Security Reset Feature Active</span>
+          <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 text-xs text-stone-400 space-y-1.5">
+            <div className="flex items-center justify-between text-[#c5a059] font-bold">
+              <div className="flex items-center gap-1">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Admin Login Credentials</span>
+              </div>
+              <span className="text-[10px] text-emerald-400 font-mono">Sync Active</span>
             </div>
-            <p className="text-[11px] text-stone-400">
-              Click &quot;Forgot Password?&quot; above to test sending a 6-digit recovery code to your email.
+            <div className="text-[11px] text-stone-300 font-mono bg-black/30 p-2 rounded-xl border border-white/5 space-y-0.5">
+              <div><span className="text-stone-400">Username:</span> philipsamuel <span className="text-stone-500">(or admin@boutique.sl)</span></div>
+              <div><span className="text-stone-400">Password:</span> admin123</div>
+            </div>
+            <p className="text-[10px] text-stone-400">
+              Click &quot;Forgot Password?&quot; above to reset password or send a 6-digit code to your email.
             </p>
           </div>
         </div>

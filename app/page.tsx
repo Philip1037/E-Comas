@@ -136,7 +136,7 @@ export default function StorefrontPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#faf8f5] text-stone-900 pb-16 md:pb-0">
+    <div className="relative min-h-screen flex flex-col bg-[#faf8f5] text-stone-900 pb-16 md:pb-0 overflow-x-hidden">
       {/* 1. Header & Navigation with ☰ Drawer & Search */}
       <Navbar
         onOpenVip={handleOpenVip}
@@ -151,7 +151,7 @@ export default function StorefrontPage() {
       <HeroBanner onOpenVip={handleOpenVip} />
 
       {/* 4. Main Catalog Section with SHEIN Circular Story Bubbles & 2-Column Grid */}
-      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 flex-1 w-full">
+      <main className="relative z-10 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 flex-1 w-full">
         {/* SHEIN Circular Category Stories & Sorting Toolbar */}
         <CategoryFilter
           activeCategory={activeCategory}
@@ -163,9 +163,9 @@ export default function StorefrontPage() {
           totalProductsCount={sortedProducts.length}
         />
 
-        {/* SHEIN 2-COLUMN MOBILE / 4-COLUMN DESKTOP PRODUCT GRID */}
+        {/* PRODUCT GRID */}
         {sortedProducts.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-5 pt-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6 pt-4">
             {sortedProducts.map((product) => (
               <ProductCard
                 key={product.id}

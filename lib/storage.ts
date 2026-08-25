@@ -5,11 +5,11 @@ import { INITIAL_PRODUCTS, INITIAL_SUBSCRIBERS, INITIAL_ORDERS, DEFAULT_SETTINGS
 import { supabase } from './supabase';
 
 const STORAGE_KEYS = {
-  PRODUCTS: 'boutique_products_v4',
+  PRODUCTS: 'boutique_products_v5',
   SUBSCRIBERS: 'boutique_subscribers_v1',
   ORDERS: 'boutique_orders_v1',
   SETTINGS: 'boutique_settings_v1',
-  CATEGORIES: 'boutique_categories_v4',
+  CATEGORIES: 'boutique_categories_v5',
   CART: 'boutique_cart_v1',
   ADMIN_AUTH: 'boutique_admin_auth_v1',
 };
@@ -43,20 +43,30 @@ export async function initializeDatabaseSync(): Promise<void> {
     // 1. Fetch & Sync Products
     const { data: dbProducts } = await supabase.from('products').select('*').order('created_at', { ascending: false });
     if (dbProducts && dbProducts.length > 0) {
-      const formattedProducts: Product[] = dbProducts.map((p) => ({
-        id: p.id,
-        title: p.title,
-        description: p.description || '',
-        price: Number(p.price),
-        category_id: p.category_id || 'all',
-        images: p.images || [],
-        stock_quantity: p.stock_quantity ?? 10,
-        is_new_arrival: p.is_new_arrival ?? true,
-        is_best_seller: p.is_best_seller ?? false,
-        is_active: p.is_active ?? true,
-        tags: p.tags || [],
-        created_at: p.created_at,
-      }));
+      // Deduplicate DB products by title
+      const seenTitles = new Set<string>();
+      const formattedProducts: Product[] = [];
+
+      for (const p of dbProducts) {
+        const titleKey = (p.title || '').trim().toLowerCase();
+        if (!seenTitles.has(titleKey)) {
+          seenTitles.add(titleKey);
+          formattedProducts.push({
+            id: p.id,
+            title: p.title,
+            description: p.description || '',
+            price: Number(p.price),
+            category_id: p.category_id || 'all',
+            images: p.images || [],
+            stock_quantity: p.stock_quantity ?? 10,
+            is_new_arrival: p.is_new_arrival ?? true,
+            is_best_seller: p.is_best_seller ?? false,
+            is_active: p.is_active ?? true,
+            tags: p.tags || [],
+            created_at: p.created_at,
+          });
+        }
+      }
       setLocalItem(STORAGE_KEYS.PRODUCTS, formattedProducts);
     } else {
       // Seed initial products to Supabase if DB is empty
@@ -401,11 +411,11 @@ export function getStoredSettings(): BoutiqueSettings {
   return getLocalItem<BoutiqueSettings>(STORAGE_KEYS.SETTINGS, DEFAULT_SETTINGS);
 }
 
-export function saveStoredSettings(settings: BoutiqueSettings): void {
+export async function saveStoredSettings(settings: BoutiqueSettings): Promise<void> {
   setLocalItem(STORAGE_KEYS.SETTINGS, settings);
 
   // Sync to Supabase boutique_settings table
-  supabase.from('boutique_settings').upsert({
+  const { error } = await supabase.from('boutique_settings').upsert({
     id: 1,
     brand_name: settings.brand_name,
     tagline: settings.tagline,
@@ -428,10 +438,10 @@ export function saveStoredSettings(settings: BoutiqueSettings): void {
     admin_password: settings.admin_password,
     admin_recovery_email: settings.admin_recovery_email,
     updated_at: new Date().toISOString(),
-  }).then(({ error }) => {
-    if (error) console.error('Error saving settings to Supabase:', error);
   });
+  if (error) console.error('Error saving settings to Supabase:', error);
 }
+
 
 // Admin Auth State
 export function isUserAdminAuthenticated(): boolean {
